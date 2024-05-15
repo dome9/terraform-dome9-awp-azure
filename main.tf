@@ -1,17 +1,24 @@
+
+# The data source retrieves the onboarding data of an AWS account in Dome9 AWP.
+data "dome9_awp_azure_onboarding_data" "dome9_awp_azure_onboarding_data_source" {
+  cloud_account_id = var.awp_cloud_account_id
+  centralized_cloud_account_id = var.awp_centralized_cloud_account_id
+} 
+
 data "external" "get_application_id" {
-  program = ["bash", "-c", "az ad sp show --id ${"data.?"} --query '{appId: id}' --output json"]
+  program = ["bash", "-c", "az ad sp show --id ${data.dome9_awp_azure_onboarding_data.dome9_awp_azure_onboarding_data_source.client_id} --query '{appId: id}' --output json"]
 }
 
 # locals
 locals {
   awp_module_version = "2"
   scan_mode = var.awp_scan_mode
-  awp_cloud_account_id = "data.?"
+  awp_cloud_account_id = data.dome9_awp_azure_onboarding_data.dome9_awp_azure_onboarding_data_source.cloud_account_id
   app_object_id = data.external.get_application_id.result["appId"]
-  awp_centralized_cloud_account_id = "data.?"
+  awp_centralized_cloud_account_id = data.dome9_awp_azure_onboarding_data.dome9_awp_azure_onboarding_data_source.centralized_account_id
   awp_is_scanned_hub = var.awp_is_scanned_hub # the default for hub subscription is not scanned
   awp_skip_function_app_scan = var.awp_skip_function_app_scan
-  location = "data.?" # "West US"
+  location = data.dome9_awp_azure_onboarding_data.dome9_awp_azure_onboarding_data_source.region # "West US"
   
   # Constants
   SCAN_MODE_SAAS = "saas"
