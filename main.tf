@@ -8,7 +8,7 @@ data "dome9_awp_azure_onboarding_data" "dome9_awp_azure_onboarding_data_source" 
 data "external" "get_application_id" {
   program = ["bash", "-c", "az ad sp show --id ${data.dome9_awp_azure_onboarding_data.dome9_awp_azure_onboarding_data_source.app_client_id} --query '{appId: id}' --output json"]
   depends_on = [
-    dome9_awp_azure_onboarding_data.dome9_awp_azure_onboarding_data_source
+    data.dome9_awp_azure_onboarding_data.dome9_awp_azure_onboarding_data_source
   ]
 }
 
