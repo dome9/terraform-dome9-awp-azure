@@ -31,7 +31,7 @@ variable "awp_skip_function_app_scan" {
 variable "awp_account_settings_azure" {
     description = "AZURE Cloud Account settings"
     type        = object({
-        disabled_regions                 = optional(list(string))  # List of regions to disable scanning e.g. ["East US", "West US"]
+        disabled_regions                 = optional(list(string))  # List of regions to disable scanning e.g. ["eastus", "westus"]
         scan_machine_interval_in_hours   = optional(number)        # Scan machine interval in hours
         max_concurrent_scans_per_region  = optional(number)        # Maximum concurrence scans per region
         custom_tags                      = optional(map(string))   # Custom tags to be added to AWP resources e.g. {"key1" = "value1", "key2" = "value2"}
