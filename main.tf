@@ -286,3 +286,20 @@ resource "azurerm_role_assignment" "cloudguard_function_apps_scan_operator_assig
   ]
 }
 # END Assign custom roles based on scan mode
+
+
+# ----- Enable CloudGuard AWP Azure Onboarding -----
+resource "dome9_awp_azure_onboarding" "awp_azure_onboarding_resource" {
+  cloudguard_account_id          = var.awp_cloud_account_id
+  scan_mode                      = local.scan_mode
+
+  dynamic "agentless_account_settings" {
+    for_each = var.awp_account_settings_azure != null ? [var.awp_account_settings_azure] : []
+    content {
+      disabled_regions                 = agentless_account_settings.value.disabled_regions
+      scan_machine_interval_in_hours   = agentless_account_settings.value.scan_machine_interval_in_hours
+      max_concurrent_scans_per_region = agentless_account_settings.value.max_concurrent_scans_per_region
+      custom_tags                      = agentless_account_settings.value.custom_tags
+    }
+  }
+}
