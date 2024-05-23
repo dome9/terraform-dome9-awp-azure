@@ -2,7 +2,7 @@
 # The data source retrieves the onboarding data of an AWS account in Dome9 AWP.
 data "dome9_awp_azure_onboarding_data" "dome9_awp_azure_onboarding_data_source" {
   cloud_account_id             = var.awp_cloud_account_id
-  centralized_cloud_account_id = var.scan_mode == local.SCAN_MODE_IN_ACCOUNT_SUB ? var.awp_centralized_cloud_account_id : null
+  centralized_cloud_account_id = var.awp_scan_mode == local.SCAN_MODE_IN_ACCOUNT_SUB ? var.awp_centralized_cloud_account_id : null
 }
 
 data "external" "get_application_id" {
