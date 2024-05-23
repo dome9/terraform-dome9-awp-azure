@@ -32,17 +32,17 @@ module "terraform-dome9-awp-azure" {
   source               = "dome9/awp-azure/dome9"
   awp_cloud_account_id = dome9_cloudaccount_azure.my_azure_cloud_account.id # [<CLOUDGUARD_ACCOUNT_ID | <AZURE_SUBSCRIPTION>]  
   awp_scan_mode        = "inAccount"                              # [inAccount | saas |inAccountHub | inAccountSub ]  
+  awp_centralized_cloud_account_id = "CENTRALIZED_CLOUAD_ACCOUNT_ID OR SUBSCRIPTION ID" # relenat only for inAccountSub mode
 
   # Optional customizations:
   awp_is_scanned_hub        = false
-  awp_centralized_cloud_account_id = "CENTRALIZED_CLOUAD_ACCOUNT_ID OR SUBSCRIPTION ID"
-  awp_skip_function_app_scan = false
 
   # Optional account Settings
   # e.g:  
   awp_account_settings_azure = {
     scan_machine_interval_in_hours  = 24
-    disabled_regions                = [] # e.g ["East US", "West US"]
+    skip_function_apps_scan = false
+    disabled_regions                = [] # e.g ["eastus", "westus"]
     max_concurrent_scans_per_region = 20
     custom_tags = {
       tag1 = "value1"

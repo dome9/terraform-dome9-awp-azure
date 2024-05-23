@@ -20,7 +20,7 @@ locals {
   app_object_id                    = data.external.get_application_id.result["appId"]
   awp_centralized_cloud_account_id = data.dome9_awp_azure_onboarding_data.dome9_awp_azure_onboarding_data_source.awp_centralized_cloud_account_id
   awp_is_scanned_hub               = var.awp_is_scanned_hub # the default for hub subscription is not scanned
-  awp_skip_function_app_scan       = var.awp_skip_function_app_scan
+  awp_skip_function_app_scan       = var.awp_account_settings_azure != null && var.awp_account_settings_azure.skip_function_apps_scan != null ? var.awp_account_settings_azure.skip_function_apps_scan : false
   location                         = data.dome9_awp_azure_onboarding_data.dome9_awp_azure_onboarding_data_source.region # "West US"
 
   # Constants
@@ -299,8 +299,9 @@ resource "dome9_awp_azure_onboarding" "awp_azure_onboarding_resource" {
     content {
       disabled_regions                 = agentless_account_settings.value.disabled_regions
       scan_machine_interval_in_hours   = agentless_account_settings.value.scan_machine_interval_in_hours
-      max_concurrent_scans_per_region = agentless_account_settings.value.max_concurrent_scans_per_region
+      max_concurrent_scans_per_region  = agentless_account_settings.value.max_concurrent_scans_per_region
       custom_tags                      = agentless_account_settings.value.custom_tags
+      skip_function_apps_scan          = local.awp_skip_function_app_scan
     }
   }
 }
