@@ -1,10 +1,10 @@
 variable "awp_cloud_account_id" {
-    description = "CLOUDGUARD_ACCOUNT_ID or AZURE_SUBSCRIPTION"
+    description = "CLOUDGUARD_ACCOUNT_ID or AZURE_SUBSCRIPTION_ID"
     type        = string
 }
 
 variable "awp_scan_mode" {
-    description = "AWP scan mode <inAccount|saas|inAccountHub|inAccountSub>" # the valid values are "inAccount" or "saas" or "inAccountHub" or "inAccountSub" when onboarding the AWS account to Dome9 AWP.
+    description = "AWP scan mode <inAccount|saas|inAccountHub|inAccountSub>" # the valid values are "inAccount" or "saas" or "inAccountHub" or "inAccountSub" when onboarding the Azure account to Dome9 AWP.
     type        = string
     default     = "inAccount"
     
@@ -13,13 +13,13 @@ variable "awp_scan_mode" {
 variable "awp_is_scanned_hub" {
   description = "AWP is scanned hub" # Is the hub subscription also scanned by AWP, this param is relevant in case scan_mode is inAccountHub
   type        = bool
-  default = false
+  default     = false
 }
 
 variable "awp_centralized_cloud_account_id" {
     description = "CLOUDGUARD_ACCOUNT_ID or AZURE_SUBSCRIPTION"
     type        = string
-    default = null
+    default     = null
 }
 
 variable "awp_account_settings_azure" {

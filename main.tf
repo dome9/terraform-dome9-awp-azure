@@ -1,5 +1,5 @@
 
-# The data source retrieves the onboarding data of an AWS account in Dome9 AWP.
+# The data source retrieves the onboarding data of an Azure account in Dome9 AWP.
 data "dome9_awp_azure_onboarding_data" "dome9_awp_azure_onboarding_data_source" {
   cloud_account_id             = var.awp_cloud_account_id
   centralized_cloud_account_id = var.awp_scan_mode == local.SCAN_MODE_IN_ACCOUNT_SUB ? var.awp_centralized_cloud_account_id : null
@@ -204,6 +204,7 @@ resource "azurerm_user_assigned_identity" "cloudguard_identity" {
   name                = local.AWP_FA_MANAGED_IDENTITY_NAME
   location            = azurerm_resource_group.cloudguard[count.index].location
   resource_group_name = azurerm_resource_group.cloudguard[count.index].name
+ 
   depends_on = [
     azurerm_resource_group.cloudguard
   ]
@@ -247,6 +248,7 @@ resource "azurerm_role_assignment" "cloudguard_vm_scan_operator_assignment" {
   scope                = "/subscriptions/${data.azurerm_subscription.scanner.subscription_id}"
   role_definition_name = azurerm_role_definition.cloudguard_vm_scan_operator[count.index].name
   principal_id         = local.app_object_id
+ 
   depends_on = [
     azurerm_role_definition.cloudguard_vm_scan_operator
   ]
@@ -259,6 +261,7 @@ resource "azurerm_role_assignment" "cloudguard_function_apps_scanner_assignment"
   scope                = "/subscriptions/${data.azurerm_subscription.scanner.subscription_id}"
   role_definition_name = azurerm_role_definition.cloudguard_function_apps_scanner[count.index].name
   principal_id         = azurerm_user_assigned_identity.cloudguard_identity[count.index].principal_id
+ 
   depends_on = [
     azurerm_role_definition.cloudguard_function_apps_scanner
   ]
@@ -270,6 +273,7 @@ resource "azurerm_role_assignment" "cloudguard_function_apps_scanner_assignment_
   scope                = "/subscriptions/${data.dome9_cloudaccount_azure.azure_ds_sub[count.index].subscription_id}"
   role_definition_name = "${local.AWP_FA_SCANNER_ROLE_NAME_PREFIX} ${data.azurerm_subscription.scanner.subscription_id}"
   principal_id         = data.azurerm_user_assigned_identity.cloudguard_identity_data[count.index].principal_id
+
   depends_on = [
     azurerm_role_definition.cloudguard_function_apps_scanner
   ]
@@ -281,6 +285,7 @@ resource "azurerm_role_assignment" "cloudguard_function_apps_scan_operator_assig
   scope                = "/subscriptions/${data.azurerm_subscription.scanner.subscription_id}"
   role_definition_name = azurerm_role_definition.cloudguard_function_apps_scan_operator[count.index].name
   principal_id         = local.app_object_id
+ 
   depends_on = [
     azurerm_role_definition.cloudguard_function_apps_scan_operator
   ]

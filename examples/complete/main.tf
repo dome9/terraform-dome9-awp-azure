@@ -9,8 +9,8 @@ provider "dome9" {
 }
 
 
-# 2. Pre-requisite: Onborded AZURE Account to CloudGuard Dome9
-# [!NOTE] If the AZURE account is already onboarded, you can skip this step.
+# 2. Pre-requisite: Onborded Azure Account to CloudGuard Dome9
+# [!NOTE] If the Azure account is already onboarded, you can skip this step.
 
 # https://registry.terraform.io/providers/dome9/dome9/latest/docs/resources/cloudaccount_azure
  
@@ -26,13 +26,13 @@ provider "dome9" {
 
 /* ----- Module Usage ----- */
 
-# 3. AWP Onboarding using the Dome9 AWP AZURE module
+# 3. AWP Onboarding using the Dome9 AWP Azure module
 
 module "terraform-dome9-awp-azure" {
   source               = "dome9/awp-azure/dome9"
-  awp_cloud_account_id = dome9_cloudaccount_azure.my_azure_cloud_account.id # [<CLOUDGUARD_ACCOUNT_ID | <AZURE_SUBSCRIPTION>]  
+  awp_cloud_account_id = dome9_cloudaccount_azure.my_azure_cloud_account.id # [<CLOUDGUARD_ACCOUNT_ID | <AZURE_SUBSCRIPTION_ID>]  
   awp_scan_mode        = "inAccount"                              # [inAccount | saas |inAccountHub | inAccountSub ]  
-  awp_centralized_cloud_account_id = "CENTRALIZED_CLOUAD_ACCOUNT_ID OR SUBSCRIPTION ID" # relenat only for inAccountSub mode
+  awp_centralized_cloud_account_id = "CENTRALIZED_CLOUAD_ACCOUNT_ID OR AZURE_SUBSCRIPTION_ID" # relevat only for inAccountSub mode
 
   # Optional customizations:
   awp_is_scanned_hub        = false
@@ -41,7 +41,7 @@ module "terraform-dome9-awp-azure" {
   # e.g:  
   awp_account_settings_azure = {
     scan_machine_interval_in_hours  = 24
-    skip_function_apps_scan = false
+    skip_function_apps_scan         = false
     disabled_regions                = [] # e.g ["eastus", "westus"]
     max_concurrent_scans_per_region = 20
     custom_tags = {

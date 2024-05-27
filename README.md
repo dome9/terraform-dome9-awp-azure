@@ -49,6 +49,7 @@ This module use [Check Point CloudGuard Dome9 Provider](https://registry.terrafo
 | [azurerm_role_definition.cloudguard_vm_data_share](https://registry.terraform.io/providers/hashicorp/azurerm/3.99.0/docs/resources/role_definition) | resource |
 | [azurerm_role_definition.cloudguard_vm_scan_operator](https://registry.terraform.io/providers/hashicorp/azurerm/3.99.0/docs/resources/role_definition) | resource |
 | [azurerm_user_assigned_identity.cloudguard_identity](https://registry.terraform.io/providers/hashicorp/azurerm/3.99.0/docs/resources/user_assigned_identity) | resource |
+| [dome9_awp_azure_onboarding.awp_azure_onboarding_resource](https://registry.terraform.io/providers/dome9/dome9/latest/docs/resources/awp_azure_onboarding) | resource |
 
 ## Outputs
 
