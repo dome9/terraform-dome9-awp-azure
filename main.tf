@@ -5,8 +5,9 @@ data "dome9_awp_azure_onboarding_data" "dome9_awp_azure_onboarding_data_source" 
   centralized_cloud_account_id = var.awp_scan_mode == local.SCAN_MODE_IN_ACCOUNT_SUB ? var.awp_centralized_cloud_account_id : null
 }
 
-data "external" "get_application_id" {
-  program = ["bash", "-c", "az ad sp show --id ${data.dome9_awp_azure_onboarding_data.dome9_awp_azure_onboarding_data_source.app_client_id} --query '{appId: id}' --output json"]
+data "azuread_service_principal" "my_service_principal" {
+  client_id = data.dome9_awp_azure_onboarding_data.dome9_awp_azure_onboarding_data_source.app_client_id
+  
   depends_on = [
     data.dome9_awp_azure_onboarding_data.dome9_awp_azure_onboarding_data_source
   ]
@@ -17,8 +18,7 @@ locals {
   awp_module_version               = "2"
   scan_mode                        = var.awp_scan_mode
   awp_cloud_account_id             = data.dome9_awp_azure_onboarding_data.dome9_awp_azure_onboarding_data_source.awp_cloud_account_id
-  # app_object_id                    = data.external.get_application_id.result["appId"]
-  app_object_id                    = data.dome9_awp_azure_onboarding_data.dome9_awp_azure_onboarding_data_source.app_client_id
+  app_object_id                    = data.azuread_service_principal.my_service_principal.id
   awp_centralized_cloud_account_id = data.dome9_awp_azure_onboarding_data.dome9_awp_azure_onboarding_data_source.awp_centralized_cloud_account_id
   awp_is_scanned_hub               = var.awp_is_scanned_hub # the default for hub subscription is not scanned
   awp_skip_function_app_scan       = var.awp_account_settings_azure != null && var.awp_account_settings_azure.skip_function_apps_scan != null ? var.awp_account_settings_azure.skip_function_apps_scan : false
