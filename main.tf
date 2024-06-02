@@ -300,4 +300,19 @@ resource "dome9_awp_azure_onboarding" "awp_azure_onboarding_resource" {
       skip_function_apps_scan          = local.awp_skip_function_app_scan
     }
   }
+
+    depends_on = [
+    azurerm_resource_group.cloudguard,
+    azurerm_resource_group.cloudguard_sub,  
+    azurerm_role_definition.cloudguard_vm_data_share,
+    azurerm_role_definition.cloudguard_vm_scan_operator,
+    azurerm_role_definition.cloudguard_function_apps_scanner,
+    azurerm_role_definition.cloudguard_function_apps_scan_operator,
+    azurerm_role_assignment.cloudguard_function_apps_scan_operator_assignment,
+    azurerm_role_assignment.cloudguard_function_apps_scanner_assignment,
+    azurerm_role_assignment.cloudguard_function_apps_scanner_assignment_sub,
+    azurerm_role_assignment.cloudguard_vm_data_share_assignment,
+    azurerm_role_assignment.cloudguard_vm_data_share_assignment_sub,
+    azurerm_role_assignment.cloudguard_vm_scan_operator_assignment
+  ]
 }
