@@ -290,6 +290,7 @@ resource "dome9_awp_azure_onboarding" "awp_azure_onboarding_resource" {
   cloudguard_account_id          = var.awp_cloud_account_id
   scan_mode                      = local.scan_mode
   centralized_cloud_account_id   = local.awp_centralized_cloud_account_id
+  management_group_id            = var.management_group_id
   
   dynamic "agentless_account_settings" {
     for_each = var.awp_account_settings_azure != null ? [var.awp_account_settings_azure] : []
