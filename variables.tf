@@ -22,6 +22,12 @@ variable "awp_centralized_cloud_account_id" {
     default     = null
 }
 
+variable "management_group_id" {
+  description = "Management Group Id"
+  type        = string
+  default     = null
+}
+
 variable "awp_account_settings_azure" {
     description = "Azure Cloud Account settings"
     type        = object({

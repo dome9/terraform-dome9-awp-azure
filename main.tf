@@ -23,6 +23,7 @@ locals {
   awp_is_scanned_hub               = var.awp_is_scanned_hub # the default for hub subscription is not scanned
   awp_skip_function_app_scan       = var.awp_account_settings_azure != null && var.awp_account_settings_azure.skip_function_apps_scan != null ? var.awp_account_settings_azure.skip_function_apps_scan : false
   location                         = data.dome9_awp_azure_onboarding_data.dome9_awp_azure_onboarding_data_source.region # "West US"
+  group_name                       = var.management_group_id != null ? var.management_group_id : data.dome9_cloudaccount_azure.azure_data_source.tenant_id
 
   # Constants
   SCAN_MODE_SAAS           = "saas"
@@ -142,7 +143,7 @@ resource "azurerm_role_definition" "cloudguard_vm_data_share" {
   provider    = azurerm.azure_resource_manager
   name        = "${local.AWP_VM_DATA_SHARE_ROLE_NAME_PREFIX} ${data.dome9_cloudaccount_azure.azure_data_source.subscription_id}"
   description = local.AWP_VM_DATA_SHARE_ROLE_DESCRIPTION
-  scope       = local.scan_mode == local.SCAN_MODE_IN_ACCOUNT || local.scan_mode == local.SCAN_MODE_SAAS ? "/subscriptions/${data.dome9_cloudaccount_azure.azure_data_source.subscription_id}" : "/providers/Microsoft.Management/managementGroups/${data.dome9_cloudaccount_azure.azure_data_source.tenant_id}"
+  scope       = local.scan_mode == local.SCAN_MODE_IN_ACCOUNT || local.scan_mode == local.SCAN_MODE_SAAS ? "/subscriptions/${data.dome9_cloudaccount_azure.azure_data_source.subscription_id}" : "/providers/Microsoft.Management/managementGroups/${local.group_name}"
   permissions {
     actions     = local.AWP_VM_DATA_SHARE_ROLE_ACTIONS
     not_actions = []
@@ -168,7 +169,7 @@ resource "azurerm_role_definition" "cloudguard_function_apps_scanner" {
   provider    = azurerm.azure_resource_manager
   name        = "${local.AWP_FA_SCANNER_ROLE_NAME_PREFIX} ${data.dome9_cloudaccount_azure.azure_data_source.subscription_id}"
   description = local.AWP_FA_SCANNER_ROLE_DESCRIPTION
-  scope       = local.scan_mode == local.SCAN_MODE_IN_ACCOUNT ? "/subscriptions/${data.dome9_cloudaccount_azure.azure_data_source.subscription_id}" : "/providers/Microsoft.Management/managementGroups/${data.dome9_cloudaccount_azure.azure_data_source.tenant_id}"
+  scope       = local.scan_mode == local.SCAN_MODE_IN_ACCOUNT ? "/subscriptions/${data.dome9_cloudaccount_azure.azure_data_source.subscription_id}" : "/providers/Microsoft.Management/managementGroups/${local.group_name}"
   permissions {
     actions     = local.AWP_FA_SCANNER_ROLE_ACTIONS
     not_actions = []

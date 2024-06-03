@@ -36,6 +36,7 @@ module "terraform-dome9-awp-azure" {
 
   # Optional customizations:
   awp_is_scanned_hub        = false
+  management_group_id       = "management group id"
 
   # Optional account Settings
   # e.g:  
