@@ -37,5 +37,11 @@ variable "awp_account_settings_azure" {
         max_concurrent_scans_per_region  = optional(number)        # Maximum concurrence scans per region
         custom_tags                      = optional(map(string))   # Custom tags to be added to AWP resources e.g. {"key1" = "value1", "key2" = "value2"}
     })
-    default = null
+    default = {
+        disabled_regions                 = []          
+        skip_function_apps_scan          = false         
+        scan_machine_interval_in_hours   = 24            
+        max_concurrent_scans_per_region  = 20           
+        custom_tags                      = {}            
+  }
 }
