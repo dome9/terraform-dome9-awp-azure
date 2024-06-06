@@ -64,6 +64,7 @@ module "terraform-dome9-awp-azure" {
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.0 |
 | <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) | 3.99.0 |
 | <a name="requirement_dome9"></a> [dome9](#requirement\_dome9) | >=1.29.7 |
+| <a name="requirement_time"></a> [time](#requirement\_time) | 0.11.2 |
 <!-- END_TF_HEADER_DOCS -->
 
 ## Inputs
@@ -107,7 +108,7 @@ module "terraform-dome9-awp-azure" {
 | [azurerm_role_definition.cloudguard_vm_scan_operator](https://registry.terraform.io/providers/hashicorp/azurerm/3.99.0/docs/resources/role_definition) | resource |
 | [azurerm_user_assigned_identity.cloudguard_identity](https://registry.terraform.io/providers/hashicorp/azurerm/3.99.0/docs/resources/user_assigned_identity) | resource |
 | [dome9_awp_azure_onboarding.awp_azure_onboarding_resource](https://registry.terraform.io/providers/dome9/dome9/latest/docs/resources/awp_azure_onboarding) | resource |
-| [time_sleep.wait_for_role_creation](https://registry.terraform.io/providers/hashicorp/time/latest/docs/resources/sleep) | resource |
+| [time_sleep.wait_for_role_creation](https://registry.terraform.io/providers/hashicorp/time/0.11.2/docs/resources/sleep) | resource |
 
 ## Outputs
 
