@@ -150,6 +150,13 @@ resource "azurerm_role_definition" "cloudguard_vm_data_share" {
   }
 }
 
+resource "time_sleep" "wait_for_role_creation" {
+  count           = local.scan_mode != local.SCAN_MODE_IN_ACCOUNT_SUB ? 1 : 0
+  depends_on      = [azurerm_role_definition.cloudguard_vm_data_share]
+  create_duration = "30s"
+}
+
+
 resource "azurerm_role_definition" "cloudguard_vm_scan_operator" {
   count       = local.scan_mode == local.SCAN_MODE_IN_ACCOUNT || local.scan_mode == local.SCAN_MODE_IN_ACCOUNT_HUB ? 1 : 0
   provider    = azurerm.azure_resource_manager
@@ -163,6 +170,11 @@ resource "azurerm_role_definition" "cloudguard_vm_scan_operator" {
   }
 }
 
+resource "time_sleep" "wait_for_role_creation" {
+  count           = local.scan_mode == local.SCAN_MODE_IN_ACCOUNT || local.scan_mode == local.SCAN_MODE_IN_ACCOUNT_HUB ? 1 : 0
+  depends_on      = [azurerm_role_definition.cloudguard_vm_scan_operator]
+  create_duration = "30s"
+}
 
 resource "azurerm_role_definition" "cloudguard_function_apps_scanner" {
   count       = (local.scan_mode == local.SCAN_MODE_IN_ACCOUNT || local.scan_mode == local.SCAN_MODE_IN_ACCOUNT_HUB) && !local.awp_skip_function_app_scan ? 1 : 0
@@ -176,6 +188,12 @@ resource "azurerm_role_definition" "cloudguard_function_apps_scanner" {
   }
 }
 
+resource "time_sleep" "wait_for_role_creation" {
+  count           = (local.scan_mode == local.SCAN_MODE_IN_ACCOUNT || local.scan_mode == local.SCAN_MODE_IN_ACCOUNT_HUB) && !local.awp_skip_function_app_scan ? 1 : 0
+  depends_on      = [azurerm_role_definition.cloudguard_function_apps_scanner]
+  create_duration = "30s"
+}
+
 resource "azurerm_role_definition" "cloudguard_function_apps_scan_operator" {
   count       = (local.scan_mode == local.SCAN_MODE_IN_ACCOUNT || local.scan_mode == local.SCAN_MODE_IN_ACCOUNT_HUB) && !local.awp_skip_function_app_scan ? 1 : 0
   provider    = azurerm.azure_resource_manager
@@ -187,6 +205,13 @@ resource "azurerm_role_definition" "cloudguard_function_apps_scan_operator" {
     not_actions = []
   }
 }
+
+resource "time_sleep" "wait_for_role_creation" {
+  count           = (local.scan_mode == local.SCAN_MODE_IN_ACCOUNT || local.scan_mode == local.SCAN_MODE_IN_ACCOUNT_HUB) && !local.awp_skip_function_app_scan ? 1 : 0
+  depends_on      = [azurerm_role_definition.cloudguard_function_apps_scan_operator]
+  create_duration = "30s"
+}
+
 # END Define custom roles based on scan mode
 
 # Define the managed identity for CloudGuard AWP
