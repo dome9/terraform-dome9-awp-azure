@@ -35,8 +35,8 @@ module "terraform-dome9-awp-azure" {
   awp_centralized_cloud_account_id = "CENTRALIZED_CLOUAD_ACCOUNT_ID OR AZURE_SUBSCRIPTION_ID" # relevat only for inAccountSub mode
 
   # Optional customizations:
-  awp_is_scanned_hub        = false
-  management_group_id       = "management group id"
+  awp_is_scanned_hub        = false # relevat only for inAccountHub mode
+  management_group_id       = "management group id" # relevat only for inAccountHub mode
 
   # Optional account Settings (supported only for inAccount and saas scan mode)
   # e.g:  
