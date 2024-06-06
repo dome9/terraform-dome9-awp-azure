@@ -29,7 +29,7 @@ variable "management_group_id" {
 }
 
 variable "awp_account_settings_azure" {
-    description = "Azure Cloud Account settings"
+    description = "Azure Cloud Account settings" # supported only for inAccount and saas scan mode
     type        = object({
         disabled_regions                 = optional(list(string))  # List of regions to disable scanning e.g. ["eastus", "westus"]
         skip_function_apps_scan          = optional(bool)          # Skip Azure Function Apps scan (supported for inAccount and inAccountSub scan modes) 

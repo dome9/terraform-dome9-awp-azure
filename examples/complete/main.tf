@@ -38,7 +38,7 @@ module "terraform-dome9-awp-azure" {
   awp_is_scanned_hub        = false
   management_group_id       = "management group id"
 
-  # Optional account Settings
+  # Optional account Settings (supported only for inAccount and saas scan mode)
   # e.g:  
   awp_account_settings_azure = {
     scan_machine_interval_in_hours  = 24
