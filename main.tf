@@ -150,14 +150,14 @@ resource "azurerm_role_definition" "cloudguard_vm_data_share" {
   }
 }
 
-resource "time_sleep" "wait_for_role_creation" {
+resource "time_sleep" "wait_for_vm_data_share_role_creation" {
   count           = local.scan_mode != local.SCAN_MODE_IN_ACCOUNT_SUB ? 1 : 0
   depends_on      = [azurerm_role_definition.cloudguard_vm_data_share]
   create_duration = "30s"
 }
 
 
-resource "azurerm_role_definition" "cloudguard_vm_scan_operator" {
+resource "azurerm_role_definition" "cloudguard_vm_data_share" {
   count       = local.scan_mode == local.SCAN_MODE_IN_ACCOUNT || local.scan_mode == local.SCAN_MODE_IN_ACCOUNT_HUB ? 1 : 0
   provider    = azurerm.azure_resource_manager
   name        = "${local.AWP_VM_OP_ROLE_NAME_PREFIX} ${data.dome9_cloudaccount_azure.azure_data_source.subscription_id}"
@@ -170,13 +170,13 @@ resource "azurerm_role_definition" "cloudguard_vm_scan_operator" {
   }
 }
 
-resource "time_sleep" "wait_for_role_creation" {
+resource "time_sleep" "wait_for_vm_data_share_role_creation" {
   count           = local.scan_mode == local.SCAN_MODE_IN_ACCOUNT || local.scan_mode == local.SCAN_MODE_IN_ACCOUNT_HUB ? 1 : 0
   depends_on      = [azurerm_role_definition.cloudguard_vm_scan_operator]
   create_duration = "30s"
 }
 
-resource "azurerm_role_definition" "cloudguard_function_apps_scanner" {
+resource "azurerm_role_definition" "cloudguard_vm_data_share" {
   count       = (local.scan_mode == local.SCAN_MODE_IN_ACCOUNT || local.scan_mode == local.SCAN_MODE_IN_ACCOUNT_HUB) && !local.awp_skip_function_app_scan ? 1 : 0
   provider    = azurerm.azure_resource_manager
   name        = "${local.AWP_FA_SCANNER_ROLE_NAME_PREFIX} ${data.dome9_cloudaccount_azure.azure_data_source.subscription_id}"
@@ -188,7 +188,7 @@ resource "azurerm_role_definition" "cloudguard_function_apps_scanner" {
   }
 }
 
-resource "time_sleep" "wait_for_role_creation" {
+resource "time_sleep" "wait_for_vm_data_share_role_creation" {
   count           = (local.scan_mode == local.SCAN_MODE_IN_ACCOUNT || local.scan_mode == local.SCAN_MODE_IN_ACCOUNT_HUB) && !local.awp_skip_function_app_scan ? 1 : 0
   depends_on      = [azurerm_role_definition.cloudguard_function_apps_scanner]
   create_duration = "30s"
@@ -206,7 +206,7 @@ resource "azurerm_role_definition" "cloudguard_function_apps_scan_operator" {
   }
 }
 
-resource "time_sleep" "wait_for_role_creation" {
+resource "time_sleep" "wait_for_function_apps_scan_operator_role_creation" {
   count           = (local.scan_mode == local.SCAN_MODE_IN_ACCOUNT || local.scan_mode == local.SCAN_MODE_IN_ACCOUNT_HUB) && !local.awp_skip_function_app_scan ? 1 : 0
   depends_on      = [azurerm_role_definition.cloudguard_function_apps_scan_operator]
   create_duration = "30s"
