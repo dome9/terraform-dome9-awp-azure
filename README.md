@@ -73,7 +73,7 @@ module "terraform-dome9-awp-azure" {
 | <a name="input_awp_cloud_account_id"></a> [awp_cloud_account_id](#input\_awp\_cloud\_account\_id) | The Id of the Azure account, onboarded to CloudGuard (can be either the Dome9 Cloud Account ID or the Azure subscription id) | `string` | n/a | yes |
 | <a name="input_awp_scan_mode"></a> [awp_scan_mode](#input\_awp\_scan\_mode) | The scan mode for the AWP `[ "inAccount" \| "saas" \| "inAccountHub" \| "inAccountSub"]`| `string` | "inAccount" | yes |
 | <a name="input_awp_centralized_cloud_account_id"></a> [awp_centralized_cloud_account_id](#input\_awp\_centralized\_cloud\_account\_id) | The Id of the centralized Azure account | `string` | `null` | no |
-| <a name="input_awp_is_scanned_hub"></a> [awp_is_scanned_hub](#input\_awp\_is\_scan_\_hub) | Is the hub subscription also scanned by AWP | `bool` | `false` | no |
+| <a name="input_awp_is_scanned_hub"></a> [awp_is_scanned_hub](#input\_awp\_is\_scan\_hub) | Is the hub subscription also scanned by AWP | `bool` | `false` | no |
 | <a name="input_management_group_id"></a> [management_group_id](#input\_management\_group\_id) | Management group ID | `string` | `null` | no |
 |  [awp_account_settings_azure](#input\_awp\_account\_settings\_azure) | AWP Account settings for Azure | object | `null` | no |
 
@@ -83,7 +83,7 @@ module "terraform-dome9-awp-azure" {
 | Name | Description | Type | Default | Valid Values |Required |
 |------|-------------|------|---------|:--------:|:--------:|
 | <a name="input_scan_machine_interval_in_hours"></a> [scan_machine_interval_in_hours](#input\_scan\_machine\_interval\_in\_hours) | Scan machine interval in hours | `number` | `24` | InAccount: `>=4`, SaaS: `>=24` | no |
-| <a name="input_skip_function_apps_scan"></a> [skip_function_apps_scan](#input\_skip\_function\_apps\_scan) | Skip Azure Function Apps scan | `bool` | `false` | no |
+| <a name="input_skip_function_apps_scan"></a> [skip_function_apps_scan](#input\_skip\_function\_apps\_scan) | Skip Azure Function Apps scan | `bool` | `false` | `true` or `false` | no |
 | <a name="input_max_concurrent_scans_per_region"></a> [max_concurrent_scans_per_region](#input\_max\_concurrent\_scans\_per\_region) | Maximum concurrent scans per region | `number` | `20` | `1` - `20` | no |
 | <a name="input_custom_tags"></a> [custom_tags](#input\_custom\_tags) | Custom tags to be added to AWP dynamic resources | `map(string)` | `{}` | `{"key" = "value", ...}` | no |
 | <a name="input_disabled_regions"></a> [disabled_regions](#input\_disabled\_regions) | List of Azure regions to disable AWP scanning | `list(string)` | `[]` | `["eastus", ...]`| no |
