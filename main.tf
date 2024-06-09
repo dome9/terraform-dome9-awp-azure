@@ -242,6 +242,11 @@ resource "azurerm_role_assignment" "cloudguard_vm_data_share_assignment" {
   role_definition_name = azurerm_role_definition.cloudguard_vm_data_share[count.index].name
   principal_id         = local.app_object_id
 
+  lifecycle {
+    create_before_destroy = false
+    replace_triggered_by = [azurerm_role_definition.cloudguard_vm_data_share]
+  }
+
   depends_on = [
     azurerm_role_definition.cloudguard_vm_data_share
   ]
@@ -279,6 +284,11 @@ resource "azurerm_role_assignment" "cloudguard_function_apps_scanner_assignment"
   role_definition_name = azurerm_role_definition.cloudguard_function_apps_scanner[count.index].name
   principal_id         = azurerm_user_assigned_identity.cloudguard_identity[count.index].principal_id
  
+   lifecycle {
+    create_before_destroy = false
+    replace_triggered_by = [azurerm_role_definition.cloudguard_function_apps_scanner]
+  }
+
   depends_on = [
     azurerm_role_definition.cloudguard_function_apps_scanner
   ]
