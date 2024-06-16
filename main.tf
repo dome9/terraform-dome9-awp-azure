@@ -21,7 +21,7 @@ locals {
   app_object_id                    = data.azuread_service_principal.my_service_principal.id
   awp_centralized_cloud_account_id = data.dome9_awp_azure_onboarding_data.dome9_awp_azure_onboarding_data_source.awp_centralized_cloud_account_id
   awp_is_scanned_hub               = var.awp_is_scanned_hub # the default for hub subscription is not scanned
-  awp_skip_function_app_scan       = local.scan_mode == local.SCAN_MODE_SAAS ? true : (var.awp_account_settings_azure != null ? (var.awp_account_settings_azure.skip_function_apps_scan != null ? var.awp_account_settings_azure.skip_function_apps_scan : false) : false)  
+  awp_skip_function_app_scan       = local.is_saas_scan_mode ? true : (var.awp_account_settings_azure != null ? (var.awp_account_settings_azure.skip_function_apps_scan != null ? var.awp_account_settings_azure.skip_function_apps_scan : false) : false)  
   location                         = data.dome9_awp_azure_onboarding_data.dome9_awp_azure_onboarding_data_source.region # "West US"
   group_name                       = var.management_group_id != null ? var.management_group_id : data.dome9_cloudaccount_azure.azure_data_source.tenant_id
 
@@ -30,6 +30,12 @@ locals {
   SCAN_MODE_IN_ACCOUNT     = "inAccount"
   SCAN_MODE_IN_ACCOUNT_SUB = "inAccountSub"
   SCAN_MODE_IN_ACCOUNT_HUB = "inAccountHub"
+
+  is_saas_scan_mode               = local.scan_mode == local.SCAN_MODE_SAAS
+  is_in_account_scan_mode         = local.scan_mode == local.SCAN_MODE_IN_ACCOUNT
+  is_in_account_hub_scan_mode     = local.scan_mode == local.SCAN_MODE_IN_ACCOUNT_HUB
+  is_in_account_sub_scan_mode     = local.scan_mode == local.SCAN_MODE_IN_ACCOUNT_SUB
+  is_not_in_account_sub_scan_mode = local.scan_mode != local.SCAN_MODE_IN_ACCOUNT_SUB
 
   AWP_VM_OP_ROLE_NAME_PREFIX            = "CloudGuard AWP VM Scan Operator"
   AWP_VM_SCAN_OPERATOR_ROLE_DESCRIPTION = "Grants all needed permissions for CloudGuard app registration to scan VMs (version: ${local.awp_module_version})"
@@ -93,11 +99,11 @@ locals {
 }
 
 data "dome9_cloudaccount_azure" "azure_data_source" {
-  id = local.scan_mode == local.SCAN_MODE_IN_ACCOUNT_SUB ? local.awp_centralized_cloud_account_id : local.awp_cloud_account_id
+  id = local.is_in_account_sub_scan_mode ? local.awp_centralized_cloud_account_id : local.awp_cloud_account_id
 }
 
 data "dome9_cloudaccount_azure" "azure_data_source_sub" {
-  count = local.scan_mode == local.SCAN_MODE_IN_ACCOUNT_SUB ? 1 : 0
+  count = local.is_in_account_sub_scan_mode ? 1 : 0
   id    = local.awp_cloud_account_id
 }
 
@@ -115,7 +121,7 @@ provider "azurerm" {
 
 # Define the resource group where CloudGuard resources will be deployed
 resource "azurerm_resource_group" "cloudguard" {
-  count    = local.scan_mode == local.SCAN_MODE_IN_ACCOUNT || local.scan_mode == local.SCAN_MODE_IN_ACCOUNT_HUB ? 1 : 0
+  count    = local.is_in_account_scan_mode || local.is_in_account_hub_scan_mode ? 1 : 0
   provider = azurerm.azure_resource_manager
   name     = local.AWP_RESOURCE_GROUP_NAME_PREFIX
   location = local.location
@@ -127,9 +133,9 @@ resource "azurerm_resource_group" "cloudguard" {
 
 # Define the resource group where CloudGuard resources will be deployed for sub account or scanned hub
 resource "azurerm_resource_group" "cloudguard_sub" {
-  count    = local.scan_mode == local.SCAN_MODE_IN_ACCOUNT_SUB || (local.scan_mode == local.SCAN_MODE_IN_ACCOUNT_HUB && local.awp_is_scanned_hub) ? 1 : 0
+  count    = local.is_in_account_sub_scan_mode || (local.is_in_account_hub_scan_mode && local.awp_is_scanned_hub) ? 1 : 0
   provider = azurerm.azure_resource_manager
-  name     = "${local.AWP_RESOURCE_GROUP_NAME_PREFIX}_${local.scan_mode == local.SCAN_MODE_IN_ACCOUNT_SUB ? data.dome9_cloudaccount_azure.azure_data_source_sub[count.index].subscription_id : data.dome9_cloudaccount_azure.azure_data_source.subscription_id}"
+  name     = "${local.AWP_RESOURCE_GROUP_NAME_PREFIX}_${local.is_in_account_sub_scan_mode ? data.dome9_cloudaccount_azure.azure_data_source_sub[count.index].subscription_id : data.dome9_cloudaccount_azure.azure_data_source.subscription_id}"
   location = local.location
   tags = {
     Owner   = local.AWP_OWNER_TAG
@@ -139,11 +145,11 @@ resource "azurerm_resource_group" "cloudguard_sub" {
 
 # Define custom roles based on scan mode
 resource "azurerm_role_definition" "cloudguard_vm_data_share" {
-  count       = local.scan_mode != local.SCAN_MODE_IN_ACCOUNT_SUB ? 1 : 0
+  count       = local.is_not_in_account_sub_scan_mode ? 1 : 0
   provider    = azurerm.azure_resource_manager
   name        = "${local.AWP_VM_DATA_SHARE_ROLE_NAME_PREFIX} ${data.dome9_cloudaccount_azure.azure_data_source.subscription_id}"
   description = local.AWP_VM_DATA_SHARE_ROLE_DESCRIPTION
-  scope       = local.scan_mode == local.SCAN_MODE_IN_ACCOUNT || local.scan_mode == local.SCAN_MODE_SAAS ? "/subscriptions/${data.dome9_cloudaccount_azure.azure_data_source.subscription_id}" : "/providers/Microsoft.Management/managementGroups/${local.group_name}"
+  scope       = local.is_in_account_scan_mode || local.is_saas_scan_mode ? "/subscriptions/${data.dome9_cloudaccount_azure.azure_data_source.subscription_id}" : "/providers/Microsoft.Management/managementGroups/${local.group_name}"
   permissions {
     actions     = local.AWP_VM_DATA_SHARE_ROLE_ACTIONS
     not_actions = []
@@ -151,14 +157,14 @@ resource "azurerm_role_definition" "cloudguard_vm_data_share" {
 }
 
 resource "time_sleep" "wait_for_vm_data_share_role_creation" {
-  count           = local.scan_mode != local.SCAN_MODE_IN_ACCOUNT_SUB ? 1 : 0
+  count           = local.is_not_in_account_sub_scan_mode ? 1 : 0
   depends_on      = [azurerm_role_definition.cloudguard_vm_data_share]
   create_duration = "30s"
 }
 
 
 resource "azurerm_role_definition" "cloudguard_vm_scan_operator" {
-  count       = local.scan_mode == local.SCAN_MODE_IN_ACCOUNT || local.scan_mode == local.SCAN_MODE_IN_ACCOUNT_HUB ? 1 : 0
+  count       = local.is_in_account_scan_mode || local.is_in_account_hub_scan_mode ? 1 : 0
   provider    = azurerm.azure_resource_manager
   name        = "${local.AWP_VM_OP_ROLE_NAME_PREFIX} ${data.dome9_cloudaccount_azure.azure_data_source.subscription_id}"
   scope       = "/subscriptions/${data.dome9_cloudaccount_azure.azure_data_source.subscription_id}"
@@ -171,17 +177,17 @@ resource "azurerm_role_definition" "cloudguard_vm_scan_operator" {
 }
 
 resource "time_sleep" "wait_for_vm_scan_operator_role_creation" {
-  count           = local.scan_mode == local.SCAN_MODE_IN_ACCOUNT || local.scan_mode == local.SCAN_MODE_IN_ACCOUNT_HUB ? 1 : 0
+  count           = local.is_in_account_scan_mode || local.is_in_account_hub_scan_mode ? 1 : 0
   depends_on      = [azurerm_role_definition.cloudguard_vm_scan_operator]
   create_duration = "30s"
 }
 
 resource "azurerm_role_definition" "cloudguard_function_apps_scanner" {
-  count       = (local.scan_mode == local.SCAN_MODE_IN_ACCOUNT || local.scan_mode == local.SCAN_MODE_IN_ACCOUNT_HUB) && !local.awp_skip_function_app_scan ? 1 : 0
+  count       = (local.is_in_account_scan_mode || local.is_in_account_hub_scan_mode) && !local.awp_skip_function_app_scan ? 1 : 0
   provider    = azurerm.azure_resource_manager
   name        = "${local.AWP_FA_SCANNER_ROLE_NAME_PREFIX} ${data.dome9_cloudaccount_azure.azure_data_source.subscription_id}"
   description = local.AWP_FA_SCANNER_ROLE_DESCRIPTION
-  scope       = local.scan_mode == local.SCAN_MODE_IN_ACCOUNT ? "/subscriptions/${data.dome9_cloudaccount_azure.azure_data_source.subscription_id}" : "/providers/Microsoft.Management/managementGroups/${local.group_name}"
+  scope       = local.is_in_account_scan_mode ? "/subscriptions/${data.dome9_cloudaccount_azure.azure_data_source.subscription_id}" : "/providers/Microsoft.Management/managementGroups/${local.group_name}"
   permissions {
     actions     = local.AWP_FA_SCANNER_ROLE_ACTIONS
     not_actions = []
@@ -189,13 +195,13 @@ resource "azurerm_role_definition" "cloudguard_function_apps_scanner" {
 }
 
 resource "time_sleep" "wait_for_function_apps_scanner_role_creation" {
-  count           = (local.scan_mode == local.SCAN_MODE_IN_ACCOUNT || local.scan_mode == local.SCAN_MODE_IN_ACCOUNT_HUB) && !local.awp_skip_function_app_scan ? 1 : 0
+  count           = (local.is_in_account_scan_mode || local.is_in_account_hub_scan_mode) && !local.awp_skip_function_app_scan ? 1 : 0
   depends_on      = [azurerm_role_definition.cloudguard_function_apps_scanner]
   create_duration = "30s"
 }
 
 resource "azurerm_role_definition" "cloudguard_function_apps_scan_operator" {
-  count       = (local.scan_mode == local.SCAN_MODE_IN_ACCOUNT || local.scan_mode == local.SCAN_MODE_IN_ACCOUNT_HUB) && !local.awp_skip_function_app_scan ? 1 : 0
+  count       = (local.is_in_account_scan_mode || local.is_in_account_hub_scan_mode) && !local.awp_skip_function_app_scan ? 1 : 0
   provider    = azurerm.azure_resource_manager
   name        = "${local.AWP_FA_SCAN_OPERATOR_ROLE_NAME_PREFIX} ${data.dome9_cloudaccount_azure.azure_data_source.subscription_id}"
   description = local.AWP_FA_SCAN_OPERATOR_ROLE_DESCRIPTION
@@ -207,7 +213,7 @@ resource "azurerm_role_definition" "cloudguard_function_apps_scan_operator" {
 }
 
 resource "time_sleep" "wait_for_function_apps_scan_operator_role_creation" {
-  count           = (local.scan_mode == local.SCAN_MODE_IN_ACCOUNT || local.scan_mode == local.SCAN_MODE_IN_ACCOUNT_HUB) && !local.awp_skip_function_app_scan ? 1 : 0
+  count           = (local.is_in_account_scan_mode || local.is_in_account_hub_scan_mode) && !local.awp_skip_function_app_scan ? 1 : 0
   depends_on      = [azurerm_role_definition.cloudguard_function_apps_scan_operator]
   create_duration = "30s"
 }
@@ -216,7 +222,7 @@ resource "time_sleep" "wait_for_function_apps_scan_operator_role_creation" {
 
 # Define the managed identity for CloudGuard AWP
 resource "azurerm_user_assigned_identity" "cloudguard_identity" {
-  count               = (local.scan_mode == local.SCAN_MODE_IN_ACCOUNT || local.scan_mode == local.SCAN_MODE_IN_ACCOUNT_HUB) && !local.awp_skip_function_app_scan ? 1 : 0
+  count               = (local.is_in_account_scan_mode || local.is_in_account_hub_scan_mode) && !local.awp_skip_function_app_scan ? 1 : 0
   provider            = azurerm.azure_resource_manager
   name                = local.AWP_FA_MANAGED_IDENTITY_NAME
   location            = azurerm_resource_group.cloudguard[count.index].location
@@ -228,7 +234,7 @@ resource "azurerm_user_assigned_identity" "cloudguard_identity" {
 }
 
 data "azurerm_user_assigned_identity" "cloudguard_identity_data_sub" {
-  count               = local.scan_mode == local.SCAN_MODE_IN_ACCOUNT_SUB ? 1 : 0
+  count               = local.is_in_account_sub_scan_mode ? 1 : 0
   provider            = azurerm.azure_resource_manager
   name                = local.AWP_FA_MANAGED_IDENTITY_NAME
   resource_group_name = local.AWP_RESOURCE_GROUP_NAME_PREFIX
@@ -236,7 +242,7 @@ data "azurerm_user_assigned_identity" "cloudguard_identity_data_sub" {
 
 # Assign custom roles based on scan mode
 resource "azurerm_role_assignment" "cloudguard_vm_data_share_assignment" {
-  count                = local.scan_mode != local.SCAN_MODE_IN_ACCOUNT_SUB ? 1 : 0
+  count                = local.is_not_in_account_sub_scan_mode ? 1 : 0
   provider             = azurerm.azure_resource_manager
   scope                = "/subscriptions/${data.dome9_cloudaccount_azure.azure_data_source.subscription_id}"
   role_definition_name = azurerm_role_definition.cloudguard_vm_data_share[count.index].name
@@ -248,13 +254,13 @@ resource "azurerm_role_assignment" "cloudguard_vm_data_share_assignment" {
   }
 
   depends_on = [
-    azurerm_role_definition.cloudguard_vm_data_share
+    time_sleep.wait_for_vm_data_share_role_creation
   ]
 }
 
 
 resource "azurerm_role_assignment" "cloudguard_vm_data_share_assignment_sub" {
-  count                = local.scan_mode == local.SCAN_MODE_IN_ACCOUNT_SUB ? 1 : 0
+  count                = local.is_in_account_sub_scan_mode ? 1 : 0
   provider             = azurerm.azure_resource_manager
   scope                = "/subscriptions/${data.dome9_cloudaccount_azure.azure_data_source_sub[count.index].subscription_id}"
   role_definition_name = "${local.AWP_VM_DATA_SHARE_ROLE_NAME_PREFIX} ${data.dome9_cloudaccount_azure.azure_data_source.subscription_id}"
@@ -265,20 +271,20 @@ resource "azurerm_role_assignment" "cloudguard_vm_data_share_assignment_sub" {
 }
 
 resource "azurerm_role_assignment" "cloudguard_vm_scan_operator_assignment" {
-  count                = local.scan_mode == local.SCAN_MODE_IN_ACCOUNT || local.scan_mode == local.SCAN_MODE_IN_ACCOUNT_HUB ? 1 : 0
+  count                = local.is_in_account_scan_mode || local.is_in_account_hub_scan_mode ? 1 : 0
   provider             = azurerm.azure_resource_manager
   scope                = "/subscriptions/${data.dome9_cloudaccount_azure.azure_data_source.subscription_id}"
   role_definition_name = azurerm_role_definition.cloudguard_vm_scan_operator[count.index].name
   principal_id         = local.app_object_id
  
   depends_on = [
-    azurerm_role_definition.cloudguard_vm_scan_operator
+    time_sleep.wait_for_vm_scan_operator_role_creation
   ]
 }
 
 
 resource "azurerm_role_assignment" "cloudguard_function_apps_scanner_assignment" {
-  count                = (local.scan_mode == local.SCAN_MODE_IN_ACCOUNT || local.scan_mode == local.SCAN_MODE_IN_ACCOUNT_HUB) && !local.awp_skip_function_app_scan ? 1 : 0
+  count                = (local.is_in_account_scan_mode || local.is_in_account_hub_scan_mode) && !local.awp_skip_function_app_scan ? 1 : 0
   provider             = azurerm.azure_resource_manager
   scope                = "/subscriptions/${data.dome9_cloudaccount_azure.azure_data_source.subscription_id}"
   role_definition_name = azurerm_role_definition.cloudguard_function_apps_scanner[count.index].name
@@ -290,31 +296,31 @@ resource "azurerm_role_assignment" "cloudguard_function_apps_scanner_assignment"
   }
 
   depends_on = [
-    azurerm_role_definition.cloudguard_function_apps_scanner
+    time_sleep.wait_for_function_apps_scanner_role_creation
   ]
 }
 
 resource "azurerm_role_assignment" "cloudguard_function_apps_scanner_assignment_sub" {
-  count                = local.scan_mode == local.SCAN_MODE_IN_ACCOUNT_SUB && !local.awp_skip_function_app_scan ? 1 : 0
+  count                = local.is_in_account_sub_scan_mode && !local.awp_skip_function_app_scan ? 1 : 0
   provider             = azurerm.azure_resource_manager
   scope                = "/subscriptions/${data.dome9_cloudaccount_azure.azure_data_source_sub[count.index].subscription_id}"
   role_definition_name = "${local.AWP_FA_SCANNER_ROLE_NAME_PREFIX} ${data.dome9_cloudaccount_azure.azure_data_source.subscription_id}"
   principal_id         = data.azurerm_user_assigned_identity.cloudguard_identity_data_sub[count.index].principal_id
 
   depends_on = [
-    azurerm_role_definition.cloudguard_function_apps_scanner
+    time_sleep.wait_for_function_apps_scanner_role_creation
   ]
 }
 
 resource "azurerm_role_assignment" "cloudguard_function_apps_scan_operator_assignment" {
-  count                = (local.scan_mode == local.SCAN_MODE_IN_ACCOUNT || local.scan_mode == local.SCAN_MODE_IN_ACCOUNT_HUB) && !local.awp_skip_function_app_scan ? 1 : 0
+  count                = (local.is_in_account_scan_mode || local.is_in_account_hub_scan_mode) && !local.awp_skip_function_app_scan ? 1 : 0
   provider             = azurerm.azure_resource_manager
   scope                = "/subscriptions/${data.dome9_cloudaccount_azure.azure_data_source.subscription_id}"
   role_definition_name = azurerm_role_definition.cloudguard_function_apps_scan_operator[count.index].name
   principal_id         = local.app_object_id
  
   depends_on = [
-    azurerm_role_definition.cloudguard_function_apps_scan_operator
+    time_sleep.wait_for_function_apps_scan_operator_role_creation
   ]
 }
 # END Assign custom roles based on scan mode
