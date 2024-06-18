@@ -11,7 +11,7 @@ variable "awp_scan_mode" {
 }
 
 variable "awp_centralized_cloud_account_id" {
-    description = "CLOUDGUARD_ACCOUNT_ID or AZURE_SUBSCRIPTION"
+    description = "CENTRALIZED_CLOUDGUARD_ACCOUNT_ID or CENTRALIZED_AZURE_SUBSCRIPTION_ID"
     type        = string
     default     = null
 }
@@ -28,8 +28,14 @@ variable "management_group_id" {
   default     = null
 }
 
+variable "awp_additional_tags" {
+  description = "Additional tags to be added to the module resources"
+  type        = map(string)
+  default     = {}
+}
+
 variable "awp_account_settings_azure" {
-    description = "Azure Cloud Account settings" # supported only for inAccount and saas scan mode
+    description = "Azure Cloud Account settings" # supported only for inAccount, inAccountSub and saas scan mode
     type        = object({
         disabled_regions                 = optional(list(string))  # List of regions to disable scanning e.g. ["eastus", "westus"]
         skip_function_apps_scan          = optional(bool)          # Skip Azure Function Apps scan (supported for inAccount and inAccountSub scan modes) 
