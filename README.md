@@ -72,7 +72,7 @@ module "terraform-dome9-awp-azure" {
 |------|-------------|------|---------|:--------:|
 | <a name="input_awp_cloud_account_id"></a> [awp_cloud_account_id](#input\_awp\_cloud\_account\_id) | The Id of the Azure account, onboarded to CloudGuard (can be either the Dome9 Cloud Account ID or the Azure subscription id) | `string` | n/a | yes |
 | <a name="input_awp_scan_mode"></a> [awp_scan_mode](#input\_awp\_scan\_mode) | The scan mode for the AWP `[ "inAccount" \| "saas" \| "inAccountHub" \| "inAccountSub"]`| `string` | "inAccount" | yes |
-| <a name="input_awp_centralized_cloud_account_id"></a> [awp_centralized_cloud_account_id](#input\_awp\_centralized\_cloud\_account\_id) | The Id of the centralized Azure account | `string` | `null` | no |
+| <a name="input_awp_centralized_cloud_account_id"></a> [awp_centralized_cloud_account_id](#input\_awp\_centralized\_cloud\_account\_id) | The Id of the centralized Azure account | `string` | `null` | in case of inAccountSub scan mode |
 | <a name="input_management_group_id"></a> [management_group_id](#input\_management\_group\_id) | Management group ID | `string` | `null` | no |
 |  [awp_account_settings_azure](#input\_awp\_account\_settings\_azure) | AWP Account settings for Azure | object | `null` | no |
 

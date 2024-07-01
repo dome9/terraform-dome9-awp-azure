@@ -1,10 +1,11 @@
 terraform {
   required_version = ">= 1.0"
   
+  ###### "TBD" #########
   required_providers {
     dome9 = {
       source = "dome9/dome9"
-      version = ">=1.29.7"
+      version = ">=1.29.7" 
     }
     azurerm = {
       source = "hashicorp/azurerm"
