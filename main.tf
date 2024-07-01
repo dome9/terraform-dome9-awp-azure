@@ -76,7 +76,7 @@ resource "azurerm_resource_group" "cloudguard" {
 
 # Define the resource group where CloudGuard resources will be deployed for sub account or scanned hub
 resource "azurerm_resource_group" "cloudguard_sub" {
-  count     = local.  is_sub_or_scanned_hub_sacn_mode_condition                                = local.is_in_account_sub_scan_mode || (local.is_in_account_hub_scan_mode && local.awp_is_scanned_hub) ? 1 : 0
+  count     = local.is_sub_or_scanned_hub_sacn_mode_condition                                
   provider  = azurerm.azure_resource_manager
   name      = "${local.awp_resource_group_name_prefix}_${local.is_in_account_sub_scan_mode ? data.dome9_cloudaccount_azure.azure_data_source_sub[count.index].subscription_id : data.dome9_cloudaccount_azure.azure_data_source.subscription_id}"
   location  = local.location
@@ -146,7 +146,7 @@ resource "time_sleep" "wait_for_vm_scan_operator_role_creation" {
 }
 
 resource "azurerm_role_definition" "cloudguard_function_apps_scanner" {
-  count         = local.is_in_account_or_hub_scan_mode_and_not_skipping_function_app_condition ? 1 : 0
+  count         = local.is_in_account_or_hub_scan_mode_and_not_skipp_function_app_condition ? 1 : 0
   provider      = azurerm.azure_resource_manager
   name          = "CloudGuard AWP Function Apps Scanner ${data.dome9_cloudaccount_azure.azure_data_source.subscription_id}"
   description   = "Grants needed permissions for CloudGuard AWP function-apps scanner (version: ${local.awp_module_version})"
@@ -162,13 +162,13 @@ resource "azurerm_role_definition" "cloudguard_function_apps_scanner" {
 }
 
 resource "time_sleep" "wait_for_function_apps_scanner_role_creation" {
-  count           = local.is_in_account_or_hub_scan_mode_and_not_skipping_function_app_condition ? 1 : 0
+  count           = local.is_in_account_or_hub_scan_mode_and_not_skipp_function_app_condition ? 1 : 0
   depends_on      = [azurerm_role_definition.cloudguard_function_apps_scanner]
   create_duration = "30s"
 }
 
 resource "azurerm_role_definition" "cloudguard_function_apps_scan_operator" {
-  count         = local.is_in_account_or_hub_scan_mode_and_not_skipping_function_app_condition ? 1 : 0
+  count         = local.is_in_account_or_hub_scan_mode_and_not_skipp_function_app_condition ? 1 : 0
   provider      = azurerm.azure_resource_manager
   name          = "CloudGuard AWP FunctionApp Scan Operator ${data.dome9_cloudaccount_azure.azure_data_source.subscription_id}"
   description   = "Grants all needed permissions for CloudGuard app registration to scan function-apps (version: ${local.awp_module_version})"
@@ -190,7 +190,7 @@ resource "azurerm_role_definition" "cloudguard_function_apps_scan_operator" {
 }
 
 resource "time_sleep" "wait_for_function_apps_scan_operator_role_creation" {
-  count           = local.is_in_account_or_hub_scan_mode_and_not_skipping_function_app_condition ? 1 : 0
+  count           = local.is_in_account_or_hub_scan_mode_and_not_skipp_function_app_condition ? 1 : 0
   depends_on      = [azurerm_role_definition.cloudguard_function_apps_scan_operator]
   create_duration = "30s"
 }
@@ -199,7 +199,7 @@ resource "time_sleep" "wait_for_function_apps_scan_operator_role_creation" {
 
 # Define the managed identity for CloudGuard AWP
 resource "azurerm_user_assigned_identity" "cloudguard_identity" {
-  count               = local.is_in_account_or_hub_scan_mode_and_not_skipping_function_app_condition ? 1 : 0
+  count               = local.is_in_account_or_hub_scan_mode_and_not_skipp_function_app_condition ? 1 : 0
   provider            = azurerm.azure_resource_manager
   name                = "CloudGuardAWPScannerManagedIdentity"
   location            = azurerm_resource_group.cloudguard[count.index].location
@@ -262,7 +262,7 @@ resource "azurerm_role_assignment" "cloudguard_vm_scan_operator_assignment" {
 
 
 resource "azurerm_role_assignment" "cloudguard_function_apps_scanner_assignment" {
-  count                = local.is_in_account_or_hub_scan_mode_and_not_skipping_function_app_condition ? 1 : 0
+  count                = local.is_in_account_or_hub_scan_mode_and_not_skipp_function_app_condition ? 1 : 0
   provider             = azurerm.azure_resource_manager
   scope                = "/subscriptions/${data.dome9_cloudaccount_azure.azure_data_source.subscription_id}"
   role_definition_name = azurerm_role_definition.cloudguard_function_apps_scanner[count.index].name
@@ -291,7 +291,7 @@ resource "azurerm_role_assignment" "cloudguard_function_apps_scanner_assignment_
 }
 
 resource "azurerm_role_assignment" "cloudguard_function_apps_scan_operator_assignment" {
-  count                = local.is_in_account_or_hub_scan_mode_and_not_skipping_function_app_condition ? 1 : 0
+  count                = local.is_in_account_or_hub_scan_mode_and_not_skipp_function_app_condition ? 1 : 0
   provider             = azurerm.azure_resource_manager
   scope                = "/subscriptions/${data.dome9_cloudaccount_azure.azure_data_source.subscription_id}"
   role_definition_name = azurerm_role_definition.cloudguard_function_apps_scan_operator[count.index].name
