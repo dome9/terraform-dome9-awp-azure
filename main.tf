@@ -76,7 +76,7 @@ resource "azurerm_resource_group" "cloudguard" {
 
 # Define the resource group where CloudGuard resources will be deployed for sub account or scanned hub
 resource "azurerm_resource_group" "cloudguard_sub" {
-  count     = local.is_sub_or_scanned_hub_sacn_mode_condition                                
+  count     = local.is_sub_or_scanned_hub_sacn_mode_condition ? 1 : 0                           
   provider  = azurerm.azure_resource_manager
   name      = "${local.awp_resource_group_name_prefix}_${local.is_in_account_sub_scan_mode ? data.dome9_cloudaccount_azure.azure_data_source_sub[count.index].subscription_id : data.dome9_cloudaccount_azure.azure_data_source.subscription_id}"
   location  = local.location
