@@ -106,13 +106,21 @@ module "terraform-dome9-awp-azure" {
 | [azurerm_role_definition.cloudguard_vm_scan_operator](https://registry.terraform.io/providers/hashicorp/azurerm/3.99.0/docs/resources/role_definition) | resource |
 | [azurerm_user_assigned_identity.cloudguard_identity](https://registry.terraform.io/providers/hashicorp/azurerm/3.99.0/docs/resources/user_assigned_identity) | resource |
 | [dome9_awp_azure_onboarding.awp_azure_onboarding_resource](https://registry.terraform.io/providers/dome9/dome9/latest/docs/resources/awp_azure_onboarding) | resource |
-| [time_sleep.wait_for_role_creation](https://registry.terraform.io/providers/hashicorp/time/0.11.2/docs/resources/sleep) | resource |
+| [time_sleep.wait_for_function_apps_scan_operator_role_creation](https://registry.terraform.io/providers/hashicorp/time/0.11.2/docs/resources/sleep) | resource |
+| [time_sleep.wait_for_function_apps_scanner_role_creation](https://registry.terraform.io/providers/hashicorp/time/0.11.2/docs/resources/sleep) | resource |
+| [time_sleep.wait_for_vm_data_share_role_creation](https://registry.terraform.io/providers/hashicorp/time/0.11.2/docs/resources/sleep) | resource |
+| [time_sleep.wait_for_vm_scan_operator_role_creation](https://registry.terraform.io/providers/hashicorp/time/0.11.2/docs/resources/sleep) | resource |
 
 ## Outputs
 
 | Name | Description |
 |------|-------------|
-| <a name="output_get_azure_subscription_id"></a> [get\_azure\_subscription\_id](#output\_get\_azure\_subscription\_id) | n/a |
+| <a name="output_account_issues"></a> [account\_issues](#output\_account\_issues) | Indicates if there are any issues with AWP in the account |
+| <a name="output_agentless_protection_enabled"></a> [agentless\_protection\_enabled](#output\_agentless\_protection\_enabled) | AWP Status |
+| <a name="output_azure_subscription_id"></a> [azure\_subscription\_id](#output\_azure\_subscription\_id) | Azure Subscription ID |
+| <a name="output_cloud_account_id"></a> [cloud\_account\_id](#output\_cloud\_account\_id) | Cloud Guard account ID |
+| <a name="output_missing_awp_private_network_regions"></a> [missing\_awp\_private\_network\_regions](#output\_missing\_awp\_private\_network\_regions) | List of regions in which AWP has issue to create virtual private network (VPC) |
+| <a name="output_should_update"></a> [should\_update](#output\_should\_update) | This module is out of date and should be updated to the latest version. |
 <!-- END_TF_DOCS -->
 
 ## FAQ & Troubleshooting
