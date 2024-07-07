@@ -21,7 +21,7 @@ locals {
   app_object_id                    = data.azuread_service_principal.my_service_principal.id
   awp_centralized_cloud_account_id = local.is_in_account_sub_scan_mode ? data.dome9_awp_azure_onboarding_data.dome9_awp_azure_onboarding_data_source.awp_centralized_cloud_account_id : null
   awp_is_scanned_hub               = local.is_in_account_hub_scan_mode ? var.awp_is_scanned_hub : false # the default for hub subscription is not scanned
-  awp_skip_function_app_scan       = local.is_in_account_hub_scan_mode ? false : (local.is_saas_scan_mode ? true : try(var.awp_account_settings_azure.skip_function_apps_scan, false))
+  awp_skip_function_app_scan       = local.is_in_account_hub_scan_mode ? false  : (local.is_saas_scan_mode ? true : (var.awp_account_settings_azure.skip_function_apps_scan != null && var.awp_account_settings_azure.skip_function_apps_scan != "" ? var.awp_account_settings_azure.skip_function_apps_scan : false))
   location                         = data.dome9_awp_azure_onboarding_data.dome9_awp_azure_onboarding_data_source.region # "westus"
   group_name                       = var.management_group_id != null ? var.management_group_id : data.dome9_cloudaccount_azure.azure_data_source.tenant_id
 
