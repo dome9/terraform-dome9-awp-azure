@@ -22,7 +22,7 @@ module "terraform-dome9-awp-azure" {
   # The Id of the Azure account, onboarded to CloudGuard (can be either the CloudGuard Cloud Account ID or the Azure subscription ID)
   awp_cloud_account_id = dome9_cloudaccount_azure.my_azure_cloud_account.id
 
-  # The AWPscan mode. Possible values are "inAccount", "saas", "inAccountHub" or "inAccountSub".
+  # The AWP scan mode. Possible values are "inAccount", "saas", "inAccountHub" or "inAccountSub".
   awp_scan_mode = "inAccount"
 
   # In case of centralized onboarding, this should be the account id (CloudGuard account id or Azure subscription id) of the centralized account
@@ -38,6 +38,7 @@ module "terraform-dome9-awp-azure" {
   awp_account_settings_azure = {
     scan_machine_interval_in_hours  = 24
     skip_function_apps_scan         = false
+    max_concurrent_scans_per_region = 20
     disabled_regions                = [] # e.g ["eastus", "westus"]
     custom_tags                     = {}   # e.g {"key1" = "value1", "key2" = "value2"} 
   }
@@ -117,9 +118,8 @@ module "terraform-dome9-awp-azure" {
 |------|-------------|
 | <a name="output_account_issues"></a> [account\_issues](#output\_account\_issues) | Indicates if there are any issues with AWP in the account |
 | <a name="output_agentless_protection_enabled"></a> [agentless\_protection\_enabled](#output\_agentless\_protection\_enabled) | AWP Status |
-| <a name="output_awp_centralized_cloud_account_id"></a> [awp\_centralized\_cloud\_account\_id](#output\_awp\_centralized\_cloud\_account\_id) | CloudGuard account ID of the centralized account, relevant for inAccountSub scan mode |
 | <a name="output_azure_subscription_id"></a> [azure\_subscription\_id](#output\_azure\_subscription\_id) | Azure Subscription ID |
-| <a name="output_cloud_account_id"></a> [cloud\_account\_id](#output\_cloud\_account\_id) | Cloud Guard account ID |
+| <a name="output_cloud_account_id"></a> [cloud\_account\_id](#output\_cloud\_account\_id) | CloudGuard account ID |
 | <a name="output_missing_awp_private_network_regions"></a> [missing\_awp\_private\_network\_regions](#output\_missing\_awp\_private\_network\_regions) | List of regions in which AWP has issue to create virtual private network (VPC) |
 | <a name="output_should_update"></a> [should\_update](#output\_should\_update) | This module is out of date and should be updated to the latest version. |
 <!-- END_TF_DOCS -->
