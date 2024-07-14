@@ -126,6 +126,7 @@ resource "azurerm_role_definition" "cloudguard_vm_scan_operator" {
     "Microsoft.Compute/snapshots/endGetAccess/action",
     "Microsoft.Network/networkInterfaces/join/action",
     "Microsoft.Network/networkInterfaces/write",
+    "Microsoft.Network/networkInterfaces/delete",
     "Microsoft.Compute/virtualMachines/write",
     "Microsoft.Compute/virtualMachines/delete",
     "Microsoft.Network/networkSecurityGroups/write",
