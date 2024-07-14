@@ -17,13 +17,13 @@ variable "awp_centralized_cloud_account_id" {
 }
 
 variable "awp_is_scanned_hub" {
-  description = "AWP is scanned hub" # Is the hub subscription also scanned by AWP, this param is relevant in case scan_mode is inAccountHub
+  description = "AWP is scanned hub" # Is the hub (centralized) subscription also scanned by AWP, this param is relevant in case scan_mode is inAccountHub.
   type        = bool
   default     = false
 }
 
 variable "management_group_id" {
-  description = "Management Group Id"
+  description = "Management Group Id" # relevant for "inAccountHub" scan mode.
   type        = string
   default     = null
 }
