@@ -4,7 +4,7 @@ variable "awp_cloud_account_id" {
 }
 
 variable "awp_scan_mode" {
-    description = "AWP scan mode <inAccount|saas|inAccountHub|inAccountSub>" # the valid values are "inAccount" or "saas" or "inAccountHub" or "inAccountSub" when onboarding the Azure account to Dome9 AWP.
+    description = "AWP scan mode, possible values are: <inAccount | saas | inAccountHub | inAccountSub>"
     type        = string
     default     = "inAccount"
     

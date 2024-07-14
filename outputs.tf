@@ -4,7 +4,7 @@ output "azure_subscription_id" {
 }
 
 output "cloud_account_id"{
-  description = "Cloud Guard account ID"
+  description = "CloudGuard account ID"
   value = resource.dome9_awp_azure_onboarding.awp_azure_onboarding_resource.cloud_account_id
 }
 

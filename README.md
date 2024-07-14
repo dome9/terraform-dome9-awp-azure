@@ -1,15 +1,15 @@
 
 # CloudGuard AWP (Azure) - Terraform Module
 
-This Terraform module is designed to onboard Azure Subscribtion to Dome9 AWP (Agentless Workload Posture) service.
+This Terraform module is designed to enable AWP (Agentless Workload Posture) on Azure Subscribtion.
 (https://www.checkpoint.com/dome9/) 
 
 This module use [Check Point CloudGuard Dome9 Provider](https://registry.terraform.io/providers/dome9/dome9/latest/docs)
 
 ## Prerequisites
 
-- Azure Account onboarded to Dome9 CloudGuard
-- Dome9 CloudGuard API Key and Secret ([Dome9 Provider Authentication](https://registry.terraform.io/providers/dome9/dome9/latest/docs#authentication))
+- Azure Account onboarded to CloudGuard
+- CloudGuard API Key and Secret ([CloudGuard Provider Authentication](https://registry.terraform.io/providers/dome9/dome9/latest/docs#authentication))
 - Azure Credentials ([Azure Provider Authentication](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs#authenticating-to-azure)) (for more info follow: [AWP Documentation](https://sc1.checkpoint.com/documents/CloudGuard_Dome9/Documentation/Workload-Protection/AWP/AWP-Azure-SaaS-and-In-Account.htm))
 
 
@@ -19,13 +19,13 @@ This module use [Check Point CloudGuard Dome9 Provider](https://registry.terrafo
 module "terraform-dome9-awp-azure" {
   source = "dome9/awp-azure/dome9"
 
-  # The Id of the Azure account,onboarded to CloudGuard (can be either the Dome9 Cloud Account ID or the Azure subscription id)
+  # The Id of the Azure account, onboarded to CloudGuard (can be either the CloudGuard Cloud Account ID or the Azure subscription ID)
   awp_cloud_account_id = dome9_cloudaccount_azure.my_azure_cloud_account.id
 
-  # The scan mode for the AWP. Valid values are "inAccount", "saas", "inAccountHub" or "inAccountSub".
+  # The AWPscan mode. Possible values are "inAccount", "saas", "inAccountHub" or "inAccountSub".
   awp_scan_mode = "inAccount"
 
-  # The Id of the centralized Azure account (can be either the Dome9 Cloud Account ID or the Azure subscription id), relevat only for inAccountSub mode
+  # In case of centralized onboarding, this should be the account id (CloudGuard account id or Azure subscription id) of the centralized account
   awp_centralized_cloud_account_id = dome9_cloudaccount_azure.my_azure_centralized_account.id
 
   # Optional customizations:
@@ -70,7 +70,7 @@ module "terraform-dome9-awp-azure" {
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| <a name="input_awp_cloud_account_id"></a> [awp_cloud_account_id](#input\_awp\_cloud\_account\_id) | The Id of the Azure account, onboarded to CloudGuard (can be either the Dome9 Cloud Account ID or the Azure subscription id) | `string` | n/a | yes |
+| <a name="input_awp_cloud_account_id"></a> [awp_cloud_account_id](#input\_awp\_cloud\_account\_id) | The Id of the Azure account, onboarded to CloudGuard (can be either the CloudGuard Cloud Account ID or the Azure subscription ID) | `string` | n/a | yes |
 | <a name="input_awp_scan_mode"></a> [awp_scan_mode](#input\_awp\_scan\_mode) | The scan mode for the AWP `[ "inAccount" \| "saas" \| "inAccountHub" \| "inAccountSub"]`| `string` | "inAccount" | yes |
 | <a name="input_awp_centralized_cloud_account_id"></a> [awp_centralized_cloud_account_id](#input\_awp\_centralized\_cloud\_account\_id) | The Id of the centralized Azure account | `string` | `null` | in case of inAccountSub scan mode |
 | <a name="input_management_group_id"></a> [management_group_id](#input\_management\_group\_id) | Management group ID | `string` | `null` | no |
@@ -84,7 +84,7 @@ module "terraform-dome9-awp-azure" {
 | <a name="input_scan_machine_interval_in_hours"></a> [scan_machine_interval_in_hours](#input\_scan\_machine\_interval\_in\_hours) | Scan machine interval in hours | `number` | `24` | InAccount: `>=4`, SaaS: `>=24` | no |
 | <a name="input_skip_function_apps_scan"></a> [skip_function_apps_scan](#input\_skip\_function\_apps\_scan) | Skip Azure Function Apps scan | `bool` | `false` | `true` or `false` | no |
 | <a name="input_max_concurrent_scans_per_region"></a> [max_concurrent_scans_per_region](#input\_max\_concurrent\_scans\_per\_region) | Maximum concurrent scans per region | `number` | `20` | `1` - `20` | no |
-| <a name="input_custom_tags"></a> [custom_tags](#input\_custom\_tags) | Custom tags to be added to AWP dynamic resources | `map(string)` | `{}` | `{"key" = "value", ...}` | no |
+| <a name="input_custom_tags"></a> [custom_tags](#input\_custom\_tags) | Custom tags to be added to AWP resources that are created during the scan process | `map(string)` | `{}` | `{"key" = "value", ...}` | no |
 | <a name="input_disabled_regions"></a> [disabled_regions](#input\_disabled\_regions) | List of Azure regions to disable AWP scanning | `list(string)` | `[]` | `["eastus", ...]`| no |
 
 <!-- BEGIN_TF_DOCS -->
@@ -117,6 +117,7 @@ module "terraform-dome9-awp-azure" {
 |------|-------------|
 | <a name="output_account_issues"></a> [account\_issues](#output\_account\_issues) | Indicates if there are any issues with AWP in the account |
 | <a name="output_agentless_protection_enabled"></a> [agentless\_protection\_enabled](#output\_agentless\_protection\_enabled) | AWP Status |
+| <a name="output_awp_centralized_cloud_account_id"></a> [awp\_centralized\_cloud\_account\_id](#output\_awp\_centralized\_cloud\_account\_id) | CloudGuard account ID of the centralized account, relevant for inAccountSub scan mode |
 | <a name="output_azure_subscription_id"></a> [azure\_subscription\_id](#output\_azure\_subscription\_id) | Azure Subscription ID |
 | <a name="output_cloud_account_id"></a> [cloud\_account\_id](#output\_cloud\_account\_id) | Cloud Guard account ID |
 | <a name="output_missing_awp_private_network_regions"></a> [missing\_awp\_private\_network\_regions](#output\_missing\_awp\_private\_network\_regions) | List of regions in which AWP has issue to create virtual private network (VPC) |

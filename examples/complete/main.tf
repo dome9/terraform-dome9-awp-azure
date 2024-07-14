@@ -32,7 +32,7 @@ module "terraform-dome9-awp-azure" {
   source               = "dome9/awp-azure/dome9"
   awp_cloud_account_id = dome9_cloudaccount_azure.my_azure_cloud_account.id # [<CLOUDGUARD_ACCOUNT_ID | <AZURE_SUBSCRIPTION_ID>]  
   awp_scan_mode        = "inAccount"                              # [inAccount | saas |inAccountHub | inAccountSub ]  
-  awp_centralized_cloud_account_id = "CENTRALIZED_CLOUD_ACCOUNT_ID OR CENTRALIZED_AZURE_SUBSCRIPTION_ID" # relevat only for inAccountSub mode
+  awp_centralized_cloud_account_id = "CENTRALIZED_CLOUD_ACCOUNT_ID or CENTRALIZED_AZURE_SUBSCRIPTION_ID" # relevat only for inAccountSub mode
 
   # Optional customizations:
   management_group_id       = "management group id" # relevat only for inAccountHub mode

@@ -6,7 +6,7 @@ output "azure_subscription_id" {
 }
 
 output "cloud_account_id" {
-  description = "Cloud Guard account ID"
+  description = "CloudGuard account ID"
   value       = module.terraform-dome9-awp-azure[0].cloud_account_id
 }
 
