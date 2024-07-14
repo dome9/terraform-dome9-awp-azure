@@ -63,7 +63,7 @@ module "terraform-dome9-awp-azure" {
 |------|---------|
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.0 |
 | <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) | 3.99.0 |
-| <a name="requirement_dome9"></a> [dome9](#requirement\_dome9) | >=1.29.7 |
+| <a name="requirement_dome9"></a> [dome9](#requirement\_dome9) | >=1.34.0 |
 | <a name="requirement_time"></a> [time](#requirement\_time) | 0.11.2 |
 <!-- END_TF_HEADER_DOCS -->
 
