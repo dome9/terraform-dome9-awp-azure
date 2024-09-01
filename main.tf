@@ -22,6 +22,7 @@ locals {
   awp_centralized_cloud_account_id = local.is_in_account_sub_scan_mode ? data.dome9_awp_azure_onboarding_data.dome9_awp_azure_onboarding_data_source.awp_centralized_cloud_account_id : null
   awp_is_scanned_hub               = local.is_in_account_hub_scan_mode ? var.awp_is_scanned_hub : false # the default for hub subscription is not scanned
   awp_skip_function_app_scan       = local.is_in_account_hub_scan_mode ? false  : (local.is_saas_scan_mode ? true : (var.awp_account_settings_azure.skip_function_apps_scan != null && var.awp_account_settings_azure.skip_function_apps_scan != "" ? var.awp_account_settings_azure.skip_function_apps_scan : false))
+  sse_cmk_scanning                 = local.is_in_account_hub_scan_mode ? (var.awp_account_settings_azure.sse_cmk_encrypted_disks_scan != null && var.awp_account_settings_azure.sse_cmk_encrypted_disks_scan != "" ? var.awp_account_settings_azure.sse_cmk_encrypted_disks_scan : false) : false
   location                         = data.dome9_awp_azure_onboarding_data.dome9_awp_azure_onboarding_data_source.region # "westus"
   group_name                       = var.management_group_id != null ? var.management_group_id : data.dome9_cloudaccount_azure.azure_data_source.tenant_id
 
@@ -149,6 +150,7 @@ resource "azurerm_role_definition" "cloudguard_vm_scan_operator" {
 }
 
 resource "azurerm_role_definition" "cloudguard_crypto_creator" {
+  count         = local.sse_cmk_scanning ? 1 : 0
   provider      = azurerm.azure_resource_manager
   name          = "CloudGuard AWP Crypto Resources Creator ${data.dome9_cloudaccount_azure.azure_data_source.subscription_id}"
   scope         = "/subscriptions/${data.dome9_cloudaccount_azure.azure_data_source.subscription_id}"
@@ -170,7 +172,7 @@ resource "azurerm_role_definition" "cloudguard_crypto_creator" {
 }
 
 resource "azurerm_role_definition" "cloudguard_disk_encryptor" {
-  count         = local.is_in_account_hub_scan_mode ? 1 : 0
+  count         = local.sse_cmk_scanning ? 1 : 0
   provider      = azurerm.azure_resource_manager
   name          = "CloudGuard AWP Disk Encryptor ${data.dome9_cloudaccount_azure.azure_data_source.subscription_id}"
   scope         = "/subscriptions/${data.dome9_cloudaccount_azure.azure_data_source.subscription_id}"
@@ -314,6 +316,21 @@ resource "azurerm_role_assignment" "cloudguard_vm_scan_operator_assignment" {
   ]
 }
 
+resource "azurerm_role_assignment" "cloudguard_crypto_creator_assignment" {
+  count                = local.is_in_account_hub_scan_mode ? 1 : 0
+  provider             = azurerm.azure_resource_manager
+  scope                = "/subscriptions/${data.dome9_cloudaccount_azure.azure_data_source.subscription_id}"
+  role_definition_name = azurerm_role_definition.cloudguard_crypto_creator[count.index].name
+  principal_id         = local.app_object_id
+}
+
+resource "azurerm_role_assignment" "disk_encryptor_assignment" {
+  count                = local.is_in_account_hub_scan_mode ? 1 : 0
+  provider             = azurerm.azure_resource_manager
+  scope                = "/subscriptions/${data.dome9_cloudaccount_azure.azure_data_source.subscription_id}"
+  role_definition_name = azurerm_role_definition.cloudguard_disk_encryptor[count.index].name
+  principal_id         = local.app_object_id
+}
 
 resource "azurerm_role_assignment" "cloudguard_function_apps_scanner_assignment" {
   count                = local.is_in_account_or_hub_scan_mode_and_not_skipp_function_app_condition ? 1 : 0
