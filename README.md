@@ -116,7 +116,6 @@ module "terraform-dome9-awp-azure" {
 
 | Name | Description |
 |------|-------------|
-| <a name="output_account_issues"></a> [account\_issues](#output\_account\_issues) | Indicates if there are any issues with AWP in the account |
 | <a name="output_agentless_protection_enabled"></a> [agentless\_protection\_enabled](#output\_agentless\_protection\_enabled) | AWP Status |
 | <a name="output_azure_subscription_id"></a> [azure\_subscription\_id](#output\_azure\_subscription\_id) | Azure Subscription ID |
 | <a name="output_cloud_account_id"></a> [cloud\_account\_id](#output\_cloud\_account\_id) | CloudGuard account ID |
