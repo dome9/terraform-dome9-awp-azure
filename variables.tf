@@ -41,6 +41,7 @@ variable "awp_account_settings_azure" {
         skip_function_apps_scan          = optional(bool)          # Skip Azure Function Apps scan (supported for inAccount and inAccountSub scan modes) 
         scan_machine_interval_in_hours   = optional(number)        # Scan machine interval in hours
         max_concurrent_scans_per_region  = optional(number)        # Maximum concurrence scans per region
+        in_account_scanner_vpc           = optional(string) # The VPC Mode. Valid values: "ManagedByAWP", "ManagedByCustomer" (supported for inAccount and inAccountHub scan modes)
         custom_tags                      = optional(map(string))   # Custom tags to be added to AWP resources e.g. {"key1" = "value1", "key2" = "value2"}
     })
     default = {}
