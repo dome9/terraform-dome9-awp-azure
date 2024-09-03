@@ -4,7 +4,7 @@ terraform {
   required_providers {
     dome9 = {
       source = "dome9/dome9"
-      version = ">=1.34.0"
+      version = ">=1.35.8"
     }
     azurerm = {
       source = "hashicorp/azurerm"
