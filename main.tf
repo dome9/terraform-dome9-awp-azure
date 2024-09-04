@@ -15,7 +15,7 @@ data "azuread_service_principal" "my_service_principal" {
 
 # locals
 locals {
-  awp_module_version               = "4"
+  awp_module_version               = "3"
   scan_mode                        = var.awp_scan_mode
   awp_cloud_account_id             = data.dome9_awp_azure_onboarding_data.dome9_awp_azure_onboarding_data_source.awp_cloud_account_id
   app_object_id                    = data.azuread_service_principal.my_service_principal.id
@@ -321,14 +321,6 @@ resource "azurerm_role_assignment" "cloudguard_crypto_creator_assignment" {
   provider             = azurerm.azure_resource_manager
   scope                = "/subscriptions/${data.dome9_cloudaccount_azure.azure_data_source.subscription_id}"
   role_definition_name = azurerm_role_definition.cloudguard_crypto_creator[count.index].name
-  principal_id         = local.app_object_id
-}
-
-resource "azurerm_role_assignment" "disk_encryptor_assignment" {
-  count                = local.is_in_account_hub_scan_mode ? 1 : 0
-  provider             = azurerm.azure_resource_manager
-  scope                = "/subscriptions/${data.dome9_cloudaccount_azure.azure_data_source.subscription_id}"
-  role_definition_name = azurerm_role_definition.cloudguard_disk_encryptor[count.index].name
   principal_id         = local.app_object_id
 }
 
