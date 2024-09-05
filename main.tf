@@ -317,7 +317,7 @@ resource "azurerm_role_assignment" "cloudguard_vm_scan_operator_assignment" {
 }
 
 resource "azurerm_role_assignment" "cloudguard_crypto_creator_assignment" {
-  count                = local.is_in_account_hub_scan_mode ? 1 : 0
+  count                = local.sse_cmk_scanning ? 1 : 0
   provider             = azurerm.azure_resource_manager
   scope                = "/subscriptions/${data.dome9_cloudaccount_azure.azure_data_source.subscription_id}"
   role_definition_name = azurerm_role_definition.cloudguard_crypto_creator[count.index].name
