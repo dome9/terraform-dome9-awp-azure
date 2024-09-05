@@ -171,6 +171,12 @@ resource "azurerm_role_definition" "cloudguard_crypto_creator" {
   }
 }
 
+resource "time_sleep" "wait_for_crypto_creator_role_creation" {
+  count           = local.sse_cmk_scanning ? 1 : 0
+  depends_on      = [azurerm_role_definition.cloudguard_crypto_creator]
+  create_duration = "30s"
+}
+
 resource "azurerm_role_definition" "cloudguard_disk_encryptor" {
   count         = local.sse_cmk_scanning ? 1 : 0
   provider      = azurerm.azure_resource_manager
@@ -322,6 +328,10 @@ resource "azurerm_role_assignment" "cloudguard_crypto_creator_assignment" {
   scope                = "/subscriptions/${data.dome9_cloudaccount_azure.azure_data_source.subscription_id}"
   role_definition_name = azurerm_role_definition.cloudguard_crypto_creator[count.index].name
   principal_id         = local.app_object_id
+
+  depends_on = [
+    time_sleep.wait_for_crypto_creator_role_creation
+  ]
 }
 
 resource "azurerm_role_assignment" "cloudguard_function_apps_scanner_assignment" {
