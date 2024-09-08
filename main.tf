@@ -43,8 +43,8 @@ locals {
   AWP_OWNER_TAG_VALUE        = "CG.AWP"
 
   common_tags = merge({
-    AWP_OBSOLETE_OWNER_TAG     = "${local.AWP_OBSOLETE_OWNER_TAG_KEY}=${local.AWP_OWNER_TAG_VALUE}"
-    AWP_OWNER_TAG              = "${local.AWP_OWNER_TAG_KEY}=${local.AWP_OWNER_TAG_VALUE}"
+    "${local.AWP_OWNER_TAG_KEY}"              = "${local.AWP_OWNER_TAG_VALUE}"
+    "${local.AWP_OBSOLETE_OWNER_TAG_KEY}"     = "${local.AWP_OWNER_TAG_VALUE}"
     "CloudGuard.AWP.Version"  = local.awp_module_version
 }, var.awp_additional_tags != null ? var.awp_additional_tags : {})
 
