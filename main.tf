@@ -378,9 +378,21 @@ resource "azurerm_role_assignment" "cloudguard_function_apps_scan_operator_assig
 resource "null_resource" "delete_awp_keys" {
   count = is_in_account_hub_scan_mode ? 1 : 0
 
+  triggers = {
+    subscription_id = data.dome9_cloudaccount_azure.azure_data_source.subscription_id
+    obsolete_owner_tag_key = local.AWP_OBSOLETE_OWNER_TAG_KEY
+    owner_tag_key = local.AWP_OWNER_TAG_KEY
+    owner_tag_value = local.AWP_OWNER_TAG_VALUE
+  }
+
   provisioner "local-exec" {
-    when = "destroy"
+    when    = destroy
     command = <<EOT
+      AWP_SUBSCRIPTION_ID="${self.triggers.subscription_id}"
+      AWP_OBSOLETE_OWNER_TAG_KEY="${self.triggers.obsolete_owner_tag_key}"
+      AWP_OWNER_TAG_KEY="${self.triggers.owner_tag_key}"
+      AWP_OWNER_TAG_VALUE="${self.triggers.owner_tag_value}"
+
       delete_awp_keys_from_all_awp_vaults(){
         AzOutput=$(az keyvault list --subscription "$AWP_SUBSCRIPTION_ID" --query "[?tags.$AWP_OBSOLETE_OWNER_TAG_KEY == '$AWP_OWNER_TAG_VALUE' || tags.$AWP_OWNER_TAG_KEY == '$AWP_OWNER_TAG_VALUE'].name" -o tsv)
         AzRetVal=$?
@@ -395,10 +407,8 @@ resource "null_resource" "delete_awp_keys" {
         _vault_name="$1"
         _awp_obsolete_owner_key_lower=$(echo "$AWP_OBSOLETE_OWNER_TAG_KEY" | tr '[:upper:]' '[:lower:]')
         _awp_owner_key_lower=$(echo "$AWP_OWNER_TAG_KEY" | tr '[:upper:]' '[:lower:]')
-
         AzOutput=$(az keyvault key list --subscription "$AWP_SUBSCRIPTION_ID" --vault-name "$_vault_name" --query "[?tags.$_awp_obsolete_owner_key_lower == '$AWP_OWNER_TAG_VALUE' || tags.$_awp_owner_key_lower == '$AWP_OWNER_TAG_VALUE'].name" -o tsv)
         AzRetVal=$?
-
         if [ $AzRetVal -eq 0 ] && [ -n "$AzOutput" ]; then
           for key in $AzOutput; do
             az keyvault key delete --vault-name "$_vault_name" --name "$key"
@@ -407,15 +417,8 @@ resource "null_resource" "delete_awp_keys" {
       }
 
       delete_awp_keys_from_all_awp_vaults
-    EOT
-
-    environment = {
-      AWP_SUBSCRIPTION_ID         = data.dome9_cloudaccount_azure.azure_data_source.subscription_id
-      AWP_OBSOLETE_OWNER_TAG_KEY  = local.AWP_OBSOLETE_OWNER_TAG_KEY
-      AWP_OWNER_TAG_KEY           = local.AWP_OWNER_TAG_KEY
-      AWP_OWNER_TAG_VALUE         = local.AWP_OWNER_TAG_VALUE
-    }
-  }
+      EOT
+        }
 
   lifecycle {
     create_before_destroy = false
