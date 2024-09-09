@@ -376,12 +376,13 @@ resource "azurerm_role_assignment" "cloudguard_function_apps_scan_operator_assig
 }
 
 resource "null_resource" "delete_awp_keys" {
-  count = "${terraform.workspace == "destroy" ? 1 : 0}"
+  count = is_in_account_hub_scan_mode ? 1 : 0
 
   provisioner "local-exec" {
+    when = "destroy"
     command = <<EOT
       delete_awp_keys_from_all_awp_vaults(){
-        AzOutput=$(az_wrapper keyvault list --subscription "$AWP_SUBSCRIPTION_ID" --query "[?tags.$AWP_OBSOLETE_OWNER_TAG_KEY == '$AWP_OWNER_TAG_VALUE' || tags.$AWP_OWNER_TAG_KEY == '$AWP_OWNER_TAG_VALUE'].name" -o tsv)
+        AzOutput=$(az keyvault list --subscription "$AWP_SUBSCRIPTION_ID" --query "[?tags.$AWP_OBSOLETE_OWNER_TAG_KEY == '$AWP_OWNER_TAG_VALUE' || tags.$AWP_OWNER_TAG_KEY == '$AWP_OWNER_TAG_VALUE'].name" -o tsv)
         AzRetVal=$?
         if [ $AzRetVal -eq 0 ] && [ -n "$AzOutput" ]; then
           for keyvault in $AzOutput; do
@@ -395,12 +396,12 @@ resource "null_resource" "delete_awp_keys" {
         _awp_obsolete_owner_key_lower=$(echo "$AWP_OBSOLETE_OWNER_TAG_KEY" | tr '[:upper:]' '[:lower:]')
         _awp_owner_key_lower=$(echo "$AWP_OWNER_TAG_KEY" | tr '[:upper:]' '[:lower:]')
 
-        AzOutput=$(az_wrapper keyvault key list --subscription "$AWP_SUBSCRIPTION_ID" --vault-name "$_vault_name" --query "[?tags.$_awp_obsolete_owner_key_lower == '$AWP_OWNER_TAG_VALUE' || tags.$_awp_owner_key_lower == '$AWP_OWNER_TAG_VALUE'].name" -o tsv)
+        AzOutput=$(az keyvault key list --subscription "$AWP_SUBSCRIPTION_ID" --vault-name "$_vault_name" --query "[?tags.$_awp_obsolete_owner_key_lower == '$AWP_OWNER_TAG_VALUE' || tags.$_awp_owner_key_lower == '$AWP_OWNER_TAG_VALUE'].name" -o tsv)
         AzRetVal=$?
 
         if [ $AzRetVal -eq 0 ] && [ -n "$AzOutput" ]; then
           for key in $AzOutput; do
-            az_wrapper keyvault key delete --vault-name "$_vault_name" --name "$key"
+            az keyvault key delete --vault-name "$_vault_name" --name "$key"
           done
         fi
       }
