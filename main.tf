@@ -379,6 +379,7 @@ resource "null_resource" "delete_awp_keys" {
   count = is_in_account_hub_scan_mode ? 1 : 0
 
   triggers = {
+    trigger = uuid()
     subscription_id = data.dome9_cloudaccount_azure.azure_data_source.subscription_id
     obsolete_owner_tag_key = local.AWP_OBSOLETE_OWNER_TAG_KEY
     owner_tag_key = local.AWP_OWNER_TAG_KEY
@@ -387,7 +388,7 @@ resource "null_resource" "delete_awp_keys" {
 
   provisioner "local-exec" {
     when    = destroy
-    command = "chmod +x delete_keys.sh; ./delete_keys.sh ${self.triggers.subscription_id} ${self.triggers.obsolete_owner_tag_key} ${self.triggers.owner_tag_key} ${self.triggers.owner_tag_value}"
+    command = "chmod +x delete_keys.sh; ${path.module}/delete_keys.sh ${self.triggers.subscription_id} ${self.triggers.obsolete_owner_tag_key} ${self.triggers.owner_tag_key} ${self.triggers.owner_tag_value}"
   }
   lifecycle {
     create_before_destroy = false
