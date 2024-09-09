@@ -380,7 +380,7 @@ resource "null_resource" "delete_awp_keys" {
 
   provisioner "local-exec" {
     when    = destroy
-    command = "./delete_keys.sh ${data.dome9_cloudaccount_azure.azure_data_source.subscription_id} ${data.dome9_cloudaccount_azure.azure_data_source.subscription_id} ${local.AWP_OWNER_TAG_KEY} ${local.AWP_OWNER_TAG_VALUE}"
+    command = "./delete_keys.sh ${local.AWP_OBSOLETE_OWNER_TAG_KEY} ${local.AWP_OBSOLETE_OWNER_TAG_KEY} ${local.AWP_OWNER_TAG_KEY} ${local.AWP_OWNER_TAG_VALUE}"
   }
   lifecycle {
     create_before_destroy = false
