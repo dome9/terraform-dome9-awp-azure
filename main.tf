@@ -378,20 +378,13 @@ resource "azurerm_role_assignment" "cloudguard_function_apps_scan_operator_assig
 resource "null_resource" "delete_awp_keys" {
   count = is_in_account_hub_scan_mode ? 1 : 0
 
-  triggers = {
-    subscription_id = data.dome9_cloudaccount_azure.azure_data_source.subscription_id
-    obsolete_owner_tag_key = local.AWP_OBSOLETE_OWNER_TAG_KEY
-    owner_tag_key = local.AWP_OWNER_TAG_KEY
-    owner_tag_value = local.AWP_OWNER_TAG_VALUE
-  }
-
   provisioner "local-exec" {
     when    = destroy
     command = <<EOT
-      AWP_SUBSCRIPTION_ID="${self.triggers.subscription_id}"
-      AWP_OBSOLETE_OWNER_TAG_KEY="${self.triggers.obsolete_owner_tag_key}"
-      AWP_OWNER_TAG_KEY="${self.triggers.owner_tag_key}"
-      AWP_OWNER_TAG_VALUE="${self.triggers.owner_tag_value}"
+      AWP_SUBSCRIPTION_ID="${data.dome9_cloudaccount_azure.azure_data_source.subscription_id}"
+      AWP_OBSOLETE_OWNER_TAG_KEY="${local.AWP_OBSOLETE_OWNER_TAG_KEY}"
+      AWP_OWNER_TAG_KEY="${local.AWP_OWNER_TAG_KEY}"
+      AWP_OWNER_TAG_VALUE="${local.AWP_OWNER_TAG_VALUE}"
 
       delete_awp_keys_from_all_awp_vaults(){
         AzOutput=$(az keyvault list --subscription "$AWP_SUBSCRIPTION_ID" --query "[?tags.$AWP_OBSOLETE_OWNER_TAG_KEY == '$AWP_OWNER_TAG_VALUE' || tags.$AWP_OWNER_TAG_KEY == '$AWP_OWNER_TAG_VALUE'].name" -o tsv)
@@ -417,8 +410,8 @@ resource "null_resource" "delete_awp_keys" {
       }
 
       delete_awp_keys_from_all_awp_vaults
-      EOT
-        }
+    EOT
+  }
 
   lifecycle {
     create_before_destroy = false
