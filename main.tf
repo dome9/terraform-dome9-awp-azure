@@ -376,7 +376,7 @@ resource "azurerm_role_assignment" "cloudguard_function_apps_scan_operator_assig
 }
 
 resource "null_resource" "delete_awp_keys" {
-  count = is_in_account_hub_scan_mode ? 1 : 0
+  count = local.is_in_account_hub_scan_mode ? 1 : 0
 
   triggers = {
     trigger = uuid()
@@ -388,7 +388,7 @@ resource "null_resource" "delete_awp_keys" {
 
   provisioner "local-exec" {
     when    = destroy
-    command = "chmod +x delete_keys.sh; ${path.module}/delete_keys.sh ${self.triggers.subscription_id} ${self.triggers.obsolete_owner_tag_key} ${self.triggers.owner_tag_key} ${self.triggers.owner_tag_value}"
+    command = "chmod +x ${path.module}/delete_keys.sh; ${path.module}/delete_keys.sh ${self.triggers.subscription_id} ${self.triggers.obsolete_owner_tag_key} ${self.triggers.owner_tag_key} ${self.triggers.owner_tag_value}"
   }
   lifecycle {
     create_before_destroy = false
