@@ -154,7 +154,7 @@ resource "azurerm_role_definition" "cloudguard_crypto_creator" {
   provider      = azurerm.azure_resource_manager
   name          = "CloudGuard AWP Crypto Resources Creator ${data.dome9_cloudaccount_azure.azure_data_source.subscription_id}"
   scope         = "/subscriptions/${data.dome9_cloudaccount_azure.azure_data_source.subscription_id}"
-  description   = "Grants all needed permissions for CloudGuard app registration to create crypto resources required for disk encryption with CMK"
+  description   = "Grants all needed permissions for CloudGuard app registration to create crypto resources required for disk encryption with CMK (version: ${local.awp_module_version})"
 
   permissions {
     actions     = [
@@ -182,7 +182,7 @@ resource "azurerm_role_definition" "cloudguard_disk_encryptor" {
   provider      = azurerm.azure_resource_manager
   name          = "CloudGuard AWP Disk Encryptor ${data.dome9_cloudaccount_azure.azure_data_source.subscription_id}"
   scope         = "/subscriptions/${data.dome9_cloudaccount_azure.azure_data_source.subscription_id}"
-  description   = "Grants all needed permissions for CloudGuard AWP's generated DES to access AWP generated key vault"
+  description   = "Grants all needed permissions for CloudGuard AWP's generated DES to access AWP generated key vault (version: ${local.awp_module_version})"
 
   permissions {
     actions     = [
