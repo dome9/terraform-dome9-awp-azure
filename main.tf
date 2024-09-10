@@ -381,7 +381,7 @@ resource "null_resource" "delete_awp_keys" {
   }
 
   lifecycle {
-    ignore_changes = [triggers["subscription_id"],triggers["obsolete_owner_tag_key"],triggers["owner_tag_key"],triggers["owner_tag_value"]]
+    ignore_changes = [triggers["subscription_id"]]
   }
 
   provisioner "local-exec" {
