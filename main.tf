@@ -375,28 +375,6 @@ resource "azurerm_role_assignment" "cloudguard_function_apps_scan_operator_assig
   ]
 }
 
-resource "null_resource" "delete_awp_keys" {
-  count = local.is_in_account_hub_scan_mode ? 1 : 0
-
-  triggers = {
-    trigger = uuid()
-    subscription_id = data.dome9_cloudaccount_azure.azure_data_source.subscription_id
-    obsolete_owner_tag_key = local.AWP_OBSOLETE_OWNER_TAG_KEY
-    owner_tag_key = local.AWP_OWNER_TAG_KEY
-    owner_tag_value = local.AWP_OWNER_TAG_VALUE
-  }
-
-  provisioner "local-exec" {
-    when    = destroy
-    command = "chmod +x ${path.module}/delete_awp_keys.sh; ${path.module}/delete_awp_keys.sh ${self.triggers.subscription_id} ${self.triggers.obsolete_owner_tag_key} ${self.triggers.owner_tag_key} ${self.triggers.owner_tag_value}"
-  }
-  lifecycle {
-    create_before_destroy = false
-  }
-}
-# END Assign custom roles based on scan mode
-
-
 # ----- Enable CloudGuard AWP Azure Onboarding -----
 resource "dome9_awp_azure_onboarding" "awp_azure_onboarding_resource" {
   cloudguard_account_id          = var.awp_cloud_account_id
@@ -415,6 +393,12 @@ resource "dome9_awp_azure_onboarding" "awp_azure_onboarding_resource" {
       sse_cmk_encrypted_disks_scan     = agentless_account_settings.value.sse_cmk_encrypted_disks_scan
       skip_function_apps_scan          = local.awp_skip_function_app_scan
     }
+  }
+
+  provisioner "local-exec" {
+    count = local.is_in_account_hub_scan_mode ? 1 : 0
+    when    = destroy
+    command = "chmod +x ${path.module}/delete_awp_keys.sh; ${path.module}/delete_awp_keys.sh ${self.triggers.subscription_id} ${self.triggers.obsolete_owner_tag_key} ${self.triggers.owner_tag_key} ${self.triggers.owner_tag_value}"
   }
 
     depends_on = [
