@@ -38,8 +38,6 @@ locals {
   
   awp_resource_group_name_prefix = "cloudguard-AWP"
 
-  AWP_OWNER_TAG_KEY          = "CG_AWP_OWNER"
-  AWP_OBSOLETE_OWNER_TAG_KEY = "Owner"
   AWP_OWNER_TAG_VALUE        = "CG.AWP"
 
   common_tags = merge({
@@ -380,18 +378,15 @@ resource "null_resource" "delete_awp_keys" {
 
   triggers = {
     subscription_id = data.dome9_cloudaccount_azure.azure_data_source.subscription_id
-    obsolete_owner_tag_key = local.AWP_OBSOLETE_OWNER_TAG_KEY
-    owner_tag_key = local.AWP_OWNER_TAG_KEY
-    owner_tag_value = local.AWP_OWNER_TAG_VALUE
   }
 
   lifecycle {
     ignore_changes = [triggers["subscription_id"],triggers["obsolete_owner_tag_key"],triggers["owner_tag_key"],triggers["owner_tag_value"]]
   }
-  
+
   provisioner "local-exec" {
     when    = destroy
-    command = "chmod +x ${path.module}/delete_awp_keys.sh; ${path.module}/delete_awp_keys.sh ${self.triggers.subscription_id} ${self.triggers.obsolete_owner_tag_key} ${self.triggers.owner_tag_key} ${self.triggers.owner_tag_value}"
+    command = "chmod +x ${path.module}/delete_awp_centralized_sse_keys.sh; ${path.module}/delete_awp_centralized_sse_keys.sh ${self.triggers.subscription_id}"
   }
 
 }
