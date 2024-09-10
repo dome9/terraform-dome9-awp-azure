@@ -385,6 +385,10 @@ resource "null_resource" "delete_awp_keys" {
     owner_tag_value = local.AWP_OWNER_TAG_VALUE
   }
 
+  lifecycle {
+    ignore_changes = [triggers["subscription_id"],triggers["obsolete_owner_tag_key"],triggers["owner_tag_key"],triggers["owner_tag_value"]]
+  }
+  
   provisioner "local-exec" {
     when    = destroy
     command = "chmod +x ${path.module}/delete_awp_keys.sh; ${path.module}/delete_awp_keys.sh ${self.triggers.subscription_id} ${self.triggers.obsolete_owner_tag_key} ${self.triggers.owner_tag_key} ${self.triggers.owner_tag_value}"
