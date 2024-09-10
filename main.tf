@@ -398,7 +398,7 @@ resource "dome9_awp_azure_onboarding" "awp_azure_onboarding_resource" {
   provisioner "local-exec" {
     count = local.is_in_account_hub_scan_mode ? 1 : 0
     when    = destroy
-    command = "chmod +x ${path.module}/delete_awp_keys.sh; ${path.module}/delete_awp_keys.sh ${self.triggers.subscription_id} ${self.triggers.obsolete_owner_tag_key} ${self.triggers.owner_tag_key} ${self.triggers.owner_tag_value}"
+    command = "chmod +x ${path.module}/delete_awp_keys.sh; ${path.module}/delete_awp_keys.sh ${data.dome9_cloudaccount_azure.azure_data_source.subscription_id} ${local.AWP_OBSOLETE_OWNER_TAG_KEY} ${local.AWP_OWNER_TAG_KEY} ${local.AWP_OWNER_TAG_VALUE}"
   }
 
     depends_on = [
