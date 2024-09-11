@@ -373,23 +373,6 @@ resource "azurerm_role_assignment" "cloudguard_function_apps_scan_operator_assig
   ]
 }
 
-resource "null_resource" "delete_awp_keys" {
-  count = local.is_in_account_hub_scan_mode ? 1 : 0
-
-  triggers = {
-    subscription_id = data.dome9_cloudaccount_azure.azure_data_source.subscription_id
-  }
-
-  lifecycle {
-    ignore_changes = [triggers["subscription_id"]]
-  }
-
-  provisioner "local-exec" {
-    when    = destroy
-    command = "chmod +x ${path.module}/delete_awp_centralized_sse_keys.sh; ${path.module}/delete_awp_centralized_sse_keys.sh ${self.triggers.subscription_id}"
-  }
-
-}
 # END Assign custom roles based on scan mode
 
 
