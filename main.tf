@@ -15,13 +15,14 @@ data "azuread_service_principal" "my_service_principal" {
 
 # locals
 locals {
-  awp_module_version               = "2"
+  awp_module_version               = "3"
   scan_mode                        = var.awp_scan_mode
   awp_cloud_account_id             = data.dome9_awp_azure_onboarding_data.dome9_awp_azure_onboarding_data_source.awp_cloud_account_id
   app_object_id                    = data.azuread_service_principal.my_service_principal.id
   awp_centralized_cloud_account_id = local.is_in_account_sub_scan_mode ? data.dome9_awp_azure_onboarding_data.dome9_awp_azure_onboarding_data_source.awp_centralized_cloud_account_id : null
   awp_is_scanned_hub               = local.is_in_account_hub_scan_mode ? var.awp_is_scanned_hub : false # the default for hub subscription is not scanned
   awp_skip_function_app_scan       = local.is_in_account_hub_scan_mode ? false  : (local.is_saas_scan_mode ? true : (var.awp_account_settings_azure.skip_function_apps_scan != null && var.awp_account_settings_azure.skip_function_apps_scan != "" ? var.awp_account_settings_azure.skip_function_apps_scan : false))
+  sse_cmk_scanning                 = local.is_in_account_hub_scan_mode && var.awp_account_settings_azure.sse_cmk_encrypted_disks_scan == true
   location                         = data.dome9_awp_azure_onboarding_data.dome9_awp_azure_onboarding_data_source.region # "westus"
   group_name                       = var.management_group_id != null ? var.management_group_id : data.dome9_cloudaccount_azure.azure_data_source.tenant_id
 
@@ -37,9 +38,12 @@ locals {
   
   awp_resource_group_name_prefix = "cloudguard-AWP"
 
+  AWP_OWNER_TAG_VALUE        = "CG.AWP"
+
   common_tags = merge({
-  Owner                     = "CG.AWP"
-  "CloudGuard.AWP.Version"  = local.awp_module_version
+    "Owner"              = "${local.AWP_OWNER_TAG_VALUE}"
+    "CG_AWP_OWNER"       = "${local.AWP_OWNER_TAG_VALUE}"
+    "CloudGuard.AWP.Version"  = local.awp_module_version
 }, var.awp_additional_tags != null ? var.awp_additional_tags : {})
 
 }
@@ -115,30 +119,85 @@ resource "azurerm_role_definition" "cloudguard_vm_scan_operator" {
 
   permissions {
     actions     = [
-    "Microsoft.Compute/disks/read",
-    "Microsoft.Compute/disks/write",
-    "Microsoft.Compute/disks/delete",
-    "Microsoft.Compute/disks/beginGetAccess/action",
-    "Microsoft.Compute/snapshots/read",
-    "Microsoft.Compute/snapshots/write",
-    "Microsoft.Compute/snapshots/delete",
-    "Microsoft.Compute/snapshots/beginGetAccess/action",
-    "Microsoft.Compute/snapshots/endGetAccess/action",
-    "Microsoft.Network/networkInterfaces/join/action",
-    "Microsoft.Network/networkInterfaces/write",
-    "Microsoft.Network/networkInterfaces/delete",
-    "Microsoft.Compute/virtualMachines/write",
-    "Microsoft.Compute/virtualMachines/delete",
-    "Microsoft.Network/networkSecurityGroups/write",
-    "Microsoft.Network/networkSecurityGroups/join/action",
-    "Microsoft.Network/virtualNetworks/write",
-    "Microsoft.Network/virtualNetworks/subnets/join/action",
-    "Microsoft.Resources/subscriptions/resourceGroups/read",
-    "Microsoft.Resources/subscriptions/resourceGroups/write"
-  ]
+      "Microsoft.Compute/disks/read",
+      "Microsoft.Compute/disks/write",
+      "Microsoft.Compute/disks/delete",
+      "Microsoft.Compute/disks/beginGetAccess/action",
+      "Microsoft.Compute/snapshots/read",
+      "Microsoft.Compute/snapshots/write",
+      "Microsoft.Compute/snapshots/delete",
+      "Microsoft.Compute/snapshots/beginGetAccess/action",
+      "Microsoft.Compute/snapshots/endGetAccess/action",
+      "Microsoft.Network/networkInterfaces/join/action",
+      "Microsoft.Network/networkInterfaces/write",
+      "Microsoft.Network/networkInterfaces/delete",
+      "Microsoft.Compute/virtualMachines/write",
+      "Microsoft.Compute/virtualMachines/delete",
+      "Microsoft.Network/networkSecurityGroups/write",
+      "Microsoft.Network/networkSecurityGroups/join/action",
+      "Microsoft.Network/virtualNetworks/write",
+      "Microsoft.Network/virtualNetworks/delete",
+      "Microsoft.Network/virtualNetworks/subnets/delete",
+      "Microsoft.Network/virtualNetworks/subnets/join/action",
+      "Microsoft.Resources/subscriptions/resourceGroups/read",
+      "Microsoft.Resources/subscriptions/resourceGroups/write",
+      "Microsoft.Network/networkSecurityGroups/delete"
+    ]
     not_actions = []
   }
 }
+
+resource "azurerm_role_definition" "cloudguard_crypto_creator" {
+  count         = local.sse_cmk_scanning ? 1 : 0
+  provider      = azurerm.azure_resource_manager
+  name          = "CloudGuard AWP Crypto Resources Creator ${data.dome9_cloudaccount_azure.azure_data_source.subscription_id}"
+  scope         = "/subscriptions/${data.dome9_cloudaccount_azure.azure_data_source.subscription_id}"
+  description   = "Grants all needed permissions for CloudGuard app registration to create crypto resources required for disk encryption with CMK (version: ${local.awp_module_version})"
+
+  permissions {
+    actions     = [
+      "Microsoft.KeyVault/*",
+      "Microsoft.Compute/diskEncryptionSets/write",
+      "Microsoft.Compute/diskEncryptionSets/delete",
+      "Microsoft.Authorization/roleAssignments/write"
+    ]
+    not_actions = []
+    data_actions = [
+      "Microsoft.KeyVault/vaults/keys/delete"
+    ]
+    not_data_actions = []
+  }
+}
+
+resource "time_sleep" "wait_for_crypto_creator_role_creation" {
+  count           = local.sse_cmk_scanning ? 1 : 0
+  depends_on      = [azurerm_role_definition.cloudguard_crypto_creator]
+  create_duration = "30s"
+}
+
+resource "azurerm_role_definition" "cloudguard_disk_encryptor" {
+  count         = local.sse_cmk_scanning ? 1 : 0
+  provider      = azurerm.azure_resource_manager
+  name          = "CloudGuard AWP Disk Encryptor ${data.dome9_cloudaccount_azure.azure_data_source.subscription_id}"
+  scope         = "/subscriptions/${data.dome9_cloudaccount_azure.azure_data_source.subscription_id}"
+  description   = "Grants all needed permissions for CloudGuard AWP's generated DES to access AWP generated key vault (version: ${local.awp_module_version})"
+
+  permissions {
+    actions     = [
+      "Microsoft.EventGrid/eventSubscriptions/write",
+      "Microsoft.EventGrid/eventSubscriptions/read",
+      "Microsoft.EventGrid/eventSubscriptions/delete"
+    ]
+    not_actions = []
+    data_actions = [
+      "Microsoft.KeyVault/vaults/keys/read",
+      "Microsoft.KeyVault/vaults/keys/wrap/action",
+      "Microsoft.KeyVault/vaults/keys/unwrap/action"
+    ]
+    not_data_actions = []
+  }
+}
+
 
 resource "time_sleep" "wait_for_vm_scan_operator_role_creation" {
   count           = local.is_in_account_or_hub_scan_mode_condition ? 1 : 0
@@ -261,6 +320,17 @@ resource "azurerm_role_assignment" "cloudguard_vm_scan_operator_assignment" {
   ]
 }
 
+resource "azurerm_role_assignment" "cloudguard_crypto_creator_assignment" {
+  count                = local.sse_cmk_scanning ? 1 : 0
+  provider             = azurerm.azure_resource_manager
+  scope                = "/subscriptions/${data.dome9_cloudaccount_azure.azure_data_source.subscription_id}"
+  role_definition_name = azurerm_role_definition.cloudguard_crypto_creator[count.index].name
+  principal_id         = local.app_object_id
+
+  depends_on = [
+    time_sleep.wait_for_crypto_creator_role_creation
+  ]
+}
 
 resource "azurerm_role_assignment" "cloudguard_function_apps_scanner_assignment" {
   count                = local.is_in_account_or_hub_scan_mode_and_not_skipp_function_app_condition ? 1 : 0
@@ -302,6 +372,7 @@ resource "azurerm_role_assignment" "cloudguard_function_apps_scan_operator_assig
     time_sleep.wait_for_function_apps_scan_operator_role_creation
   ]
 }
+
 # END Assign custom roles based on scan mode
 
 
@@ -320,6 +391,7 @@ resource "dome9_awp_azure_onboarding" "awp_azure_onboarding_resource" {
       max_concurrent_scans_per_region  = agentless_account_settings.value.max_concurrent_scans_per_region
       custom_tags                      = agentless_account_settings.value.custom_tags
       in_account_scanner_vpc           = agentless_account_settings.value.in_account_scanner_vpc
+      sse_cmk_encrypted_disks_scan     = agentless_account_settings.value.sse_cmk_encrypted_disks_scan
       skip_function_apps_scan          = local.awp_skip_function_app_scan
     }
   }
