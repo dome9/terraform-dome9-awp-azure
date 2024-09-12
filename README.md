@@ -65,7 +65,7 @@ module "terraform-dome9-awp-azure" {
 |------|---------|
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.0 |
 | <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) | 3.99.0 |
-| <a name="requirement_dome9"></a> [dome9](#requirement\_dome9) | >=1.35.8 |
+| <a name="requirement_dome9"></a> [dome9](#requirement\_dome9) | >=1.35.9 |
 | <a name="requirement_time"></a> [time](#requirement\_time) | 0.11.2 |
 <!-- END_TF_HEADER_DOCS -->
 
@@ -99,18 +99,22 @@ module "terraform-dome9-awp-azure" {
 |------|------|
 | [azurerm_resource_group.cloudguard](https://registry.terraform.io/providers/hashicorp/azurerm/3.99.0/docs/resources/resource_group) | resource |
 | [azurerm_resource_group.cloudguard_sub](https://registry.terraform.io/providers/hashicorp/azurerm/3.99.0/docs/resources/resource_group) | resource |
+| [azurerm_role_assignment.cloudguard_crypto_creator_assignment](https://registry.terraform.io/providers/hashicorp/azurerm/3.99.0/docs/resources/role_assignment) | resource |
 | [azurerm_role_assignment.cloudguard_function_apps_scan_operator_assignment](https://registry.terraform.io/providers/hashicorp/azurerm/3.99.0/docs/resources/role_assignment) | resource |
 | [azurerm_role_assignment.cloudguard_function_apps_scanner_assignment](https://registry.terraform.io/providers/hashicorp/azurerm/3.99.0/docs/resources/role_assignment) | resource |
 | [azurerm_role_assignment.cloudguard_function_apps_scanner_assignment_sub](https://registry.terraform.io/providers/hashicorp/azurerm/3.99.0/docs/resources/role_assignment) | resource |
 | [azurerm_role_assignment.cloudguard_vm_data_share_assignment](https://registry.terraform.io/providers/hashicorp/azurerm/3.99.0/docs/resources/role_assignment) | resource |
 | [azurerm_role_assignment.cloudguard_vm_data_share_assignment_sub](https://registry.terraform.io/providers/hashicorp/azurerm/3.99.0/docs/resources/role_assignment) | resource |
 | [azurerm_role_assignment.cloudguard_vm_scan_operator_assignment](https://registry.terraform.io/providers/hashicorp/azurerm/3.99.0/docs/resources/role_assignment) | resource |
+| [azurerm_role_definition.cloudguard_crypto_creator](https://registry.terraform.io/providers/hashicorp/azurerm/3.99.0/docs/resources/role_definition) | resource |
+| [azurerm_role_definition.cloudguard_disk_encryptor](https://registry.terraform.io/providers/hashicorp/azurerm/3.99.0/docs/resources/role_definition) | resource |
 | [azurerm_role_definition.cloudguard_function_apps_scan_operator](https://registry.terraform.io/providers/hashicorp/azurerm/3.99.0/docs/resources/role_definition) | resource |
 | [azurerm_role_definition.cloudguard_function_apps_scanner](https://registry.terraform.io/providers/hashicorp/azurerm/3.99.0/docs/resources/role_definition) | resource |
 | [azurerm_role_definition.cloudguard_vm_data_share](https://registry.terraform.io/providers/hashicorp/azurerm/3.99.0/docs/resources/role_definition) | resource |
 | [azurerm_role_definition.cloudguard_vm_scan_operator](https://registry.terraform.io/providers/hashicorp/azurerm/3.99.0/docs/resources/role_definition) | resource |
 | [azurerm_user_assigned_identity.cloudguard_identity](https://registry.terraform.io/providers/hashicorp/azurerm/3.99.0/docs/resources/user_assigned_identity) | resource |
 | [dome9_awp_azure_onboarding.awp_azure_onboarding_resource](https://registry.terraform.io/providers/dome9/dome9/latest/docs/resources/awp_azure_onboarding) | resource |
+| [time_sleep.wait_for_crypto_creator_role_creation](https://registry.terraform.io/providers/hashicorp/time/0.11.2/docs/resources/sleep) | resource |
 | [time_sleep.wait_for_function_apps_scan_operator_role_creation](https://registry.terraform.io/providers/hashicorp/time/0.11.2/docs/resources/sleep) | resource |
 | [time_sleep.wait_for_function_apps_scanner_role_creation](https://registry.terraform.io/providers/hashicorp/time/0.11.2/docs/resources/sleep) | resource |
 | [time_sleep.wait_for_vm_data_share_role_creation](https://registry.terraform.io/providers/hashicorp/time/0.11.2/docs/resources/sleep) | resource |
