@@ -130,14 +130,14 @@ module "terraform-dome9-awp-azure" {
 ## FAQ & Troubleshooting
 ### Centralized Offboarding with sse_cmk_encrypted_disks_scan Enabled
 
-When centralized offboarding is performed and sse_cmk_encrypted_disks_scan is enabled, AWP Keys must be deleted manually. This should be done prior to initiating the offboarding process.
+When performing centralized offboarding and sse_cmk_encrypted_disks_scan is enabled, you can delete AWP Keys manually.
+If using only the Terraform offboarding, the keys will remain in a "soft delete" state for a retention period before being permanently deleted by Azure.
 
 Steps:
-
 1. Identify Key Vaults tagged with CG_AWP_OWNER=CG.AWP.
-2. In those Key Vaults, locate and delete the keys that have the tag CG_AWP_OWNER=CG.AWP.
+2. In those Key Vaults, locate and delete the keys tagged with CG_AWP_OWNER=CG.AWP.
 
-Ensure that this action is completed before starting the offboarding to avoid issues during the process.
+This should be done before completing the offboarding process to prevent potential issues.
 
 
 ```
